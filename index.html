@@ -43,7 +43,7 @@ input[type=number]{width:64px;font:inherit;background:transparent;color:var(--tx
  <div class="r"><button data-a="copy">⇄ صفحه‌ی وسط صفحه‌نمایش ← تخته‌ی جدید</button></div>
  <div class="r"><label>نوشتن با:
   <select id="md"><option value="two">خودکار/انگشت — اسکرول با دو انگشت</option><option value="auto">تشخیص با اندازه‌ی لمس — اسکرول با یک انگشت</option><option value="pen">فقط استایلوس فعال</option></select></label><button data-a="cal">کالیبره</button></div>
- <div class="r"><label><input type="checkbox" id="cm"> دوربین (چهره)</label></div>
+ <div class="r"><label><input type="checkbox" id="cm"> دوربین (چهره)</label><label>نرمی صدا: <select id="sf"><option value="0">طبیعی</option><option value="3">ملایم</option><option value="6">نرم‌تر</option></select></label></div>
 </div>
 <div id="cd"></div><div id="ts"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -78,6 +78,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
 $('#col').oninput=e=>S.color=e.target.value;$('#wd').oninput=e=>S.w=+e.target.value;
 $('#md').onchange=e=>{S.mode=e.target.value;saveS();if(S.mode=='auto'&&S.th==null)calib()};
 $('#mn').onclick=()=>{bar.classList.toggle('h');sh.classList.add('h')};
+$('#sf').value=localStorage.cm_sf??'3';$('#sf').onchange=e=>localStorage.cm_sf=e.target.value;
 $('#qt').onclick=()=>{if(S.tool=='hand')S.tool=S.last||'pen';else{S.last=S.tool;S.tool='hand'}ui()};
 $('#qu').onclick=()=>bar.querySelector('[data-a=undo]').click();
 $('#sl').oninput=e=>{const it=secs[cur].items[e.target.value-1];if(it){V.y=-it.y*V.s;cl()}};
@@ -156,8 +157,8 @@ const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60
 $('#rb').onclick=async()=>{if(rec){rec.stop();return}
  let st;try{st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1,sampleRate:48000}})}catch{toast('دسترسی به میکروفون لازم است');return}
  const ac=new AudioContext({sampleRate:48000}),src=ac.createMediaStreamSource(st),hp=ac.createBiquadFilter(),c1=ac.createDynamicsCompressor(),g=ac.createGain(),c2=ac.createDynamicsCompressor(),dst=ac.createMediaStreamDestination();
- hp.type='highpass';hp.frequency.value=90;Object.entries({threshold:-32,knee:24,ratio:8,attack:.005,release:.25}).forEach(([a,v])=>c1[a].value=v);g.gain.value=1.7;
- Object.entries({threshold:-6,knee:0,ratio:20,attack:.001,release:.1}).forEach(([a,v])=>c2[a].value=v);src.connect(hp);hp.connect(c1);c1.connect(g);g.connect(c2);c2.connect(dst);aud={st,ac};
+ hp.type='highpass';hp.frequency.value=90;const sfv=+$('#sf').value,ws=ac.createBiquadFilter(),ds=ac.createBiquadFilter(),ar=ac.createBiquadFilter();ws.type='lowshelf';ws.frequency.value=200;ws.gain.value=sfv*.5;ds.type='peaking';ds.frequency.value=6500;ds.Q.value=1.2;ds.gain.value=-sfv;ar.type='highshelf';ar.frequency.value=9000;ar.gain.value=-sfv*.7;Object.entries({threshold:-32,knee:24,ratio:8,attack:.005,release:.25}).forEach(([a,v])=>c1[a].value=v);g.gain.value=1.7;
+ Object.entries({threshold:-6,knee:0,ratio:20,attack:.001,release:.1}).forEach(([a,v])=>c2[a].value=v);src.connect(hp);hp.connect(ws);ws.connect(ds);ds.connect(ar);ar.connect(c1);c1.connect(g);g.connect(c2);c2.connect(dst);aud={st,ac};
  bar.classList.add('h');sh.classList.add('h');const cd=$('#cd');for(let n=3;n>0;n--){cd.textContent=n;cd.style.display='flex';await new Promise(r=>setTimeout(r,800))}cd.style.display='none';
  const mt=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(t=>MediaRecorder.isTypeSupported(t));
  const vs=cv.captureStream(24);vs.addTrack(dst.stream.getAudioTracks()[0]);chunks=[];
