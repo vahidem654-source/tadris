@@ -33,8 +33,9 @@ input[type=number]{width:64px;font:inherit;background:transparent;color:var(--tx
  #sh{left:60px;right:126px;top:8px;bottom:8px;max-width:none;max-height:none;margin:0}
  #side{top:6px}#side button{width:36px;height:36px}
 }
+#cr{position:fixed;right:1px;top:50%;transform:translateY(-50%);writing-mode:vertical-rl;font-size:11px;color:var(--tx);opacity:.45;pointer-events:none;user-select:none;-webkit-user-select:none;z-index:1;white-space:nowrap;font-family:Vazirmatn,Tahoma,sans-serif}
 </style></head><body>
-<canvas id="c"></canvas><video id="vid" playsinline muted style="position:fixed;width:2px;height:2px;opacity:0;pointer-events:none"></video>
+<canvas id="c"></canvas><div id="cr">تهیه‌کننده: وحیده محجوب</div><video id="vid" playsinline muted style="position:fixed;width:2px;height:2px;opacity:0;pointer-events:none"></video>
 <div id="side"><button id="mn" title="ابزارها">☰</button><button id="qt" title="قلم / حرکت">✎</button><button id="qu" title="برگردان">↶</button><button id="rb" title="ضبط">●</button><button id="ps" style="display:none">⏸</button><span id="tm" style="display:none">00:00</span></div>
 <div id="bar" class="pn"></div>
 <div id="sh" class="pn h">
