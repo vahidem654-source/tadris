@@ -68,8 +68,8 @@ function theme(){const r=document.documentElement,g=getComputedStyle(r);TH.bg=g.
 const midItem=()=>itemAt(secs[cur],(innerHeight/2-V.y)/V.s);
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
  if(d.k){if(d.k!='hand')S.last=d.k;S.tool=d.k;ui()}else if(d.c){S.color=d.c;$('#col').value=d.c}else if(d.g)go(+d.g);
- else if(d.a=='undo'){const s=secs[cur],it=s.hist.pop();if(it){s.rhist.push(it);it.redo.push(it.strokes.pop());redrawInk(it)}}
- else if(d.a=='redo'){const s=secs[cur],it=s.rhist.pop();if(it){s.hist.push(it);it.strokes.push(it.redo.pop());redrawInk(it)}}
+ else if(d.a=='undo'){const s=secs[cur],it=s.hist.pop();if(it){s.rhist.push(it);it.redo.push(it.strokes.pop());redrawInk(it);scheduleSave()}}
+ else if(d.a=='redo'){const s=secs[cur],it=s.rhist.pop();if(it){s.hist.push(it);it.strokes.push(it.redo.pop());redrawInk(it);scheduleSave()}}
  else if(d.a=='theme'){document.documentElement.classList.toggle('day');theme()}
  else if(d.a=='sheet')sh.classList.toggle('h');else if(d.a=='fit')fit();else if(d.a=='cal')calib();
  else if(d.a=='new')addSec(mkSec('تخته',[{h:2400}],'board'));
@@ -90,15 +90,15 @@ function mkSec(name,items,kind){const s={name,kind,items,hist:[],rhist:[],V:null
 function relayout(s){const a=s===secs[cur]&&s.items.length>1?itemAt(s,-V.y/V.s):null,off=a?-V.y/V.s-a.y:0;let y=0;s.items.forEach(it=>{it.y=y;y+=it.h+GAP});s.H=y-GAP;if(a)V.y=-(a.y+off)*V.s;if(s===secs[cur])cl()}
 function itemAt(s,y){let a=s.items[0];for(const it of s.items){if(it.y<=y)a=it;else break}return a}
 function addSec(s){secs.push(s);go(secs.length-1)}
-function go(i){cur=Math.max(0,Math.min(secs.length-1,i));live=drawing=null;const s=secs[cur];if(!s.V)s.V={s:innerWidth/W,x:0,y:0};V=s.V;cl();ui()}
+function go(i){cur=Math.max(0,Math.min(secs.length-1,i));live=drawing=null;const s=secs[cur];if(!s.V)s.V={s:innerWidth/W,x:0,y:0};V=s.V;cl();ui();scheduleSave()}
 async function render(it){it.busy=1;act++;try{const pg=await it.pdf.getPage(it.no),sc=W/pg.getViewport({scale:1}).width,v=pg.getViewport({scale:sc}),c=mk(W,Math.round(v.height));
  await pg.render({canvasContext:c.getContext('2d'),viewport:v}).promise;it.bg=c;if(Math.abs(it.h-c.height)>1){it.h=c.height;it.ink=null;relayout(it.sec)}}catch{}it.busy=0;act--;dirty=1}
 const need=it=>{if(it.pdf&&!it.bg&&!it.busy&&act<2)render(it);if(!it.ink&&it.strokes.length)redrawInk(it)};
 async function sizeAll(s,doc){let p=0;for(let n=2;n<=doc.numPages;n++){const v=(await doc.getPage(n)).getViewport({scale:1}),h=Math.round(v.height*W/v.width),it=s.items[n-1];
  if(Math.abs(it.h-h)>1){it.h=h;it.ink=null;it.bg=null;p=1}if(n%25==0||n==doc.numPages){if(p){relayout(s);p=0}await new Promise(r=>setTimeout(r))}}}
 $('#fp').onchange=async e=>{const f=e.target.files[0];if(!f)return;toast('در حال باز کردن کتاب…');
- try{const doc=await pdfjsLib.getDocument({data:new Uint8Array(await f.arrayBuffer())}).promise,v=(await doc.getPage(1)).getViewport({scale:1}),h=Math.round(v.height*W/v.width);
-  const s=mkSec('کتاب',Array.from({length:doc.numPages},(_,i)=>({pdf:doc,no:i+1,h})),'book');addSec(s);toast(doc.numPages+' صفحه؛ با کشیدن انگشت ورق بزن');sizeAll(s,doc)}catch{toast('فایل PDF باز نشد')}e.target.value=''};
+ try{const buf=await f.arrayBuffer(),keep=buf.slice(0),doc=await pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise,v=(await doc.getPage(1)).getViewport({scale:1}),h=Math.round(v.height*W/v.width);
+  const s=mkSec('کتاب',Array.from({length:doc.numPages},(_,i)=>({pdf:doc,no:i+1,h})),'book');s.pdfId=Math.random().toString(36).slice(2);cput('pdf',{id:s.pdfId,data:keep});addSec(s);toast(doc.numPages+' صفحه؛ با کشیدن انگشت ورق بزن');sizeAll(s,doc)}catch{toast('فایل PDF باز نشد')}e.target.value=''};
 $('#fi').onchange=async e=>{const f=e.target.files[0];if(!f)return;const b=await createImageBitmap(f),h=Math.round(W*b.height/b.width),c=mk(W,h);c.getContext('2d').drawImage(b,0,0,W,h);addSec(mkSec('عکس',[{h,bg:c,img:1}],'img'));e.target.value=''};
 setInterval(()=>{const s=secs[cur];if(!s||s.items.length<2)return;const m=innerHeight*3/V.s,c=(innerHeight/2-V.y)/V.s;for(const it of s.items)if(Math.abs(it.y+it.h/2-c)>m){if(it.pdf)it.bg=null;it.ink=null}},2500);
 // ---- view
@@ -139,7 +139,7 @@ cv.onpointermove=e=>{if(drawing){if(e.pointerId!=drawing.id)return;drawing.pos={
 function fling(){const v={x:vel.x,y:vel.y};let t=performance.now();const f=()=>{const n=performance.now(),dt=n-t;t=n;V.x+=v.x*dt;V.y+=v.y*dt;v.x*=.95;v.y*=.95;cl();
  if((Math.abs(v.x)>.03||Math.abs(v.y)>.03)&&!ptr.size&&!drawing)requestAnimationFrame(f)};requestAnimationFrame(f)}
 cv.onpointerup=cv.onpointercancel=e=>{if(drawing){if(e.pointerId==drawing.id){const s=secs[cur],it=live.it;if(live.tool!='pen'&&live.tool!='eraser')paint(it.ink.getContext('2d'),live);
-  it.strokes.push(live);it.redo=[];s.hist.push(it);s.rhist=[];live=null;drawing=null;dirty=1}return}
+  it.strokes.push(live);it.redo=[];s.hist.push(it);s.rhist=[];live=null;drawing=null;dirty=1;scheduleSave()}return}
  ptr.delete(e.pointerId);if(!ptr.size&&vel&&performance.now()-vel.t<80)fling();g0=gest();if(!ptr.size)vel=null};
 cv.oncontextmenu=e=>e.preventDefault();
 function draw(){dirty=0;cx.setTransform(1,0,0,1,0,0);cx.fillStyle=TH.bg;cx.fillRect(0,0,cv.width,cv.height);const s=secs[cur];if(!s)return;
@@ -162,13 +162,46 @@ $('#rb').onclick=async()=>{if(rec){rec.stop();return}
  Object.entries({threshold:-6,knee:0,ratio:20,attack:.001,release:.1}).forEach(([a,v])=>c2[a].value=v);src.connect(hp);hp.connect(ws);ws.connect(ds);ds.connect(ar);ar.connect(c1);c1.connect(g);g.connect(c2);c2.connect(dst);aud={st,ac};
  bar.classList.add('h');sh.classList.add('h');const cd=$('#cd');for(let n=3;n>0;n--){cd.textContent=n;cd.style.display='flex';await new Promise(r=>setTimeout(r,800))}cd.style.display='none';
  const mt=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(t=>MediaRecorder.isTypeSupported(t));
- const vs=cv.captureStream(24);vs.addTrack(dst.stream.getAudioTracks()[0]);chunks=[];
- rec=new MediaRecorder(vs,{mimeType:mt,videoBitsPerSecond:850000,audioBitsPerSecond:96000});rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
- rec.onstop=()=>{const ext=mt.includes('mp4')?'mp4':'webm',a=document.createElement('a');a.href=URL.createObjectURL(new Blob(chunks,{type:mt.split(';')[0]}));a.download='clip-'+Date.now()+'.'+ext;a.click();
+ const vs=cv.captureStream(24);vs.addTrack(dst.stream.getAudioTracks()[0]);chunks=[];const sid=Date.now().toString(36);let cn=0;
+ rec=new MediaRecorder(vs,{mimeType:mt,videoBitsPerSecond:850000,audioBitsPerSecond:96000});rec.ondataavailable=e=>{if(e.data.size){chunks.push(e.data);cput('rec',{id:sid+':'+String(cn++).padStart(6,'0'),sid,blob:e.data,mt})}};
+ rec.onstop=()=>{const ext=mt.includes('mp4')?'mp4':'webm',a=document.createElement('a');a.href=URL.createObjectURL(new Blob(chunks,{type:mt.split(';')[0]}));a.download='clip-'+Date.now()+'.'+ext;a.click();recDone(sid);
   aud.st.getTracks().forEach(t=>t.stop());aud.ac.close();clearInterval(tmr);rec=null;$('#rb').textContent='●';$('#ps').style.display=$('#tm').style.display='none';toast('ذخیره شد ('+ext.toUpperCase()+')')};
  rec.start(1000);t0=Date.now();acc=0;$('#rb').textContent='■';$('#ps').style.display=$('#tm').style.display='block';$('#ps').textContent='⏸';
  tmr=setInterval(()=>{if(rec.state=='recording')$('#tm').textContent=fmt(acc+(Date.now()-t0)/1000)},500);navigator.wakeLock?.request('screen').catch(()=>{})};
 $('#ps').onclick=()=>{if(rec.state=='recording'){rec.pause();acc+=(Date.now()-t0)/1000;$('#ps').textContent='▶'}else{rec.resume();t0=Date.now();$('#ps').textContent='⏸'}};
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
-theme();addSec(mkSec('تخته',[{h:2400}],'board'));resize();ui();
+// ================= AUTOSAVE: project + unfinished-recording recovery =================
+let cdb=null,cready=false,svT=0;
+const cidb=()=>new Promise((res,rej)=>{const r=indexedDB.open('clipmaker',1);r.onupgradeneeded=()=>{['proj','pdf','rec'].forEach(n=>r.result.createObjectStore(n,{keyPath:'id'}))};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+const ctx_=(st,m,f)=>new Promise((res,rej)=>{const t=cdb.transaction(st,m),q=f(t.objectStore(st));t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error)});
+const cput=(s,v)=>cdb?ctx_(s,'readwrite',o=>o.put(v)).catch(()=>{}):0,cget=(s,k)=>cdb?ctx_(s,'readonly',o=>o.get(k)).catch(()=>null):Promise.resolve(null),call=s=>cdb?ctx_(s,'readonly',o=>o.getAll()).catch(()=>[]):Promise.resolve([]),cdel=(s,k)=>cdb?ctx_(s,'readwrite',o=>o.delete(k)).catch(()=>{}):0;
+const ser=s=>({name:s.name,kind:s.kind,pdf:s.pdfId||null,V:s.V,items:s.items.map(it=>({h:it.h,no:it.no,img:it.bg&&!it.pdf?(it.bgUrl||(it.bgUrl=it.bg.toDataURL('image/jpeg',.85))):null,strokes:it.strokes.map(({tool,color,w,pts})=>({tool,color,w,pts:pts.map(p=>({x:+p.x.toFixed(1),y:+p.y.toFixed(1)}))}))}))});
+const saveNow=()=>{if(cdb&&cready)cput('proj',{id:'main',t:Date.now(),cur,secs:secs.map(ser)})};
+const scheduleSave=()=>{clearTimeout(svT);svT=setTimeout(saveNow,1500)};
+document.addEventListener('visibilitychange',()=>{if(document.hidden)saveNow()});addEventListener('pagehide',saveNow);
+async function restoreProject(P){const out=[];
+ for(const q of P.secs){let items;
+  if(q.kind=='book'){const r=q.pdf&&await cget('pdf',q.pdf);if(!r)continue;const doc=await pdfjsLib.getDocument({data:new Uint8Array(r.data.slice(0))}).promise;items=q.items.map((i,n)=>({pdf:doc,no:i.no||n+1,h:i.h}))}
+  else items=await Promise.all(q.items.map(async i=>{const o={h:i.h};if(i.img){const im=new Image();await new Promise(r=>{im.onload=r;im.onerror=r;im.src=i.img});const c=mk(W,i.h);c.getContext('2d').drawImage(im,0,0,W,i.h);o.bg=c;o.img=1;o.bgUrl=i.img}return o}));
+  const s=mkSec(q.name,items,q.kind);s.pdfId=q.pdf;q.items.forEach((i,n)=>{s.items[n].strokes=i.strokes});s.V=q.V;out.push(s);
+  if(q.kind=='book'&&items.length)sizeAll(s,items[0].pdf)}
+ return out}
+function ask(html,buttons){return new Promise(res=>{const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;background:#000b;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px';
+ o.innerHTML=`<div class="pn" style="position:static;padding:16px;max-width:340px;text-align:center;line-height:1.9"><p style="margin:0 0 10px">${html}</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">${buttons.map((b,i)=>`<button class="${i==0?'on':''}" data-i="${i}">${b}</button>`).join('')}</div></div>`;
+ o.onclick=e=>{const b=e.target.closest('button');if(b){o.remove();res(+b.dataset.i)}};document.body.appendChild(o)})}
+const dlBlob=(b,n)=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(a.href)},8000)};
+const recDone=sid=>call('rec').then(l=>l.filter(x=>x.sid==sid).forEach(x=>cdel('rec',x.id)));
+async function recoverRecordings(){const l=await call('rec');if(!l.length)return;const g={};l.forEach(x=>(g[x.sid]=g[x.sid]||[]).push(x));
+ for(const sid of Object.keys(g)){const ch=g[sid].sort((a,b)=>a.id<b.id?-1:1),mb=ch.reduce((s,x)=>s+x.blob.size,0)/1048576,mt=(ch[0].mt||'video/webm').split(';')[0],ext=mt.includes('mp4')?'mp4':'webm';
+  const c=await ask(`ضبطی از دفعه‌ی قبل ناتمام مانده است (حدود ${mb.toFixed(1)} مگابایت). ذخیره‌اش کنم؟`,['💾 ذخیره‌ی ویدیو','🗑 حذف']);
+  if(c==0)dlBlob(new Blob(ch.map(x=>x.blob),{type:mt}),'clip-recovered-'+sid+'.'+ext);ch.forEach(x=>cdel('rec',x.id))}}
+(async()=>{try{cdb=await cidb()}catch{cdb=null}
+ theme();resize();let P=await cget('proj','main'),sec=null;
+ const has=P&&P.secs&&P.secs.some(q=>q.kind!='board'||q.items.some(i=>i.strokes.length||i.img));
+ if(has){const c=await ask(`کار قبلی پیدا شد (${String(P.secs.length).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d])} بخش). ادامه بدهیم؟`,['▶ ادامه‌ی کار قبلی','🆕 شروع تازه']);
+  if(c==0){try{sec=await restoreProject(P)}catch{sec=null;toast('بازیابی کامل نشد')}}
+  else{(await call('pdf')).forEach(x=>cdel('pdf',x.id))}}
+ if(sec&&sec.length){sec.forEach(s=>secs.push(s));go(Math.min(P.cur||0,secs.length-1))}else addSec(mkSec('تخته',[{h:2400}],'board'));
+ cready=true;ui();saveNow();recoverRecordings()})();
+
 </script></body></html>
