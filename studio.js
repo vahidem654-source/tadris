@@ -133,7 +133,7 @@ function pUp(e){if(live&&live.id===e.pointerId){var k=inkKey();(INK[k]=INK[k]||[
 cv.addEventListener('pointerup',pUp,true);cv.addEventListener('pointercancel',pUp,true);
 cv.addEventListener('touchmove',function(e){if(TL.tool!='none')e.preventDefault()},{passive:false});
 function buildTools(){var b=q$('#tl');b.innerHTML='<span style="font-size:13px;opacity:.8">ابزار حین ضبط:</span>'+
- [['none','🖐 بدون ابزار'],['pen','✎ قلم'],['touch','👆 فقط نشان‌دادن لمس'],['laser','🔴 لیزر']].map(function(a){return'<button data-t="'+a[0]+'">'+a[1]+'</button>'}).join('')+
+ [['none','🖐 بدون ابزار / اسکرول'],['pen','✎ قلم'],['touch','👆 فقط نشان‌دادن لمس'],['laser','🔴 لیزر']].map(function(a){return'<button data-t="'+a[0]+'">'+a[1]+'</button>'}).join('')+
  '<input type="color" id="tcol" value="'+TL.color+'"><select id="tw"><option value="3">نازک</option><option value="6" selected>متوسط</option><option value="12">ضخیم</option></select><button id="tun">↶</button><button id="tcl">🧹 پاک‌کردن خط‌های این اسلاید</button>';
  function sync(){b.querySelectorAll('[data-t]').forEach(function(x){x.classList.toggle('on',x.dataset.t==TL.tool)});cv.style.touchAction=TL.tool=='none'?'':'none';cv.style.cursor=TL.tool=='none'?'':'crosshair'}
  b.onclick=function(e){var t=e.target.closest('[data-t]');if(t){TL.tool=t.dataset.t;sync();dirty=true}};
@@ -554,6 +554,25 @@ function toolsMenu(){
   if(m=='imp')q$('#imp').click();else if(m=='img')imgDlg();else if(m=='wiz')wizDlg();else if(m=='auto')autoDlg();else if(m=='vo')voDlg();else if(m=='mus')musicDlg();else if(m=='ppt')exportPptx();else if(m=='aud')audioDlg();else if(m=='ai')aiDlg();else if(m=='undo')undoWiz()}}
 q$('#tl_').onclick=toolsMenu;
 
+
+/* ============ نوار ابزار شناور سمت چپ (در حالت صفحه‌ی بزرگ) ============ */
+(function(){
+ var css=document.createElement('style');css.textContent='#fp{display:none;position:fixed;left:4px;top:50%;transform:translateY(-50%);z-index:40;flex-direction:column;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px;max-height:96vh;overflow-y:auto;opacity:.96}#fp button{width:46px;height:46px;padding:0;font-size:20px;line-height:1}#fp button.on{background:var(--acc);color:var(--bg)}#fp #ft{font-size:11px;text-align:center;direction:ltr;min-height:14px}body.big #fp{display:flex}body.big main{margin-left:62px}body.big{overflow-y:auto}body.big .bar{display:none}body.big #out .bar,body.big #vob{display:flex}';
+ document.head.appendChild(css);
+ var f=document.createElement('div');f.id='fp';
+ f.innerHTML='<button data-f="rec" title="شروع/توقف ضبط">●</button><div id="ft"></div><button data-f="ps" title="مکث" hidden>⏸</button><button data-f="none" title="بدون ابزار / اسکرول صفحه">🖐</button><button data-f="pen" title="قلم">✎</button><button data-f="touch" title="فقط نشان‌دادن لمس">👆</button><button data-f="laser" title="لیزر">🔴</button><button data-f="un" title="برگردان آخرین خط">↶</button><button data-f="cl" title="پاک‌کردن خط‌ها">🧹</button><button data-f="pv" title="اسلاید قبلی">▲</button><button data-f="nx" title="اسلاید بعدی">▼</button><button data-f="tools" title="ابزارها">🧰</button><button data-f="exit" title="کوچک‌کردن">⮌</button>';
+ document.body.appendChild(f);
+ f.onclick=function(e){var b=e.target.closest('[data-f]');if(!b)return;var k=b.dataset.f;
+  if(k=='rec')q$('#rec').click();else if(k=='ps')q$('#ps2').click();else if(k=='un')q$('#tun').click();else if(k=='cl')q$('#tcl').click();
+  else if(k=='pv')q$('#pv')?q$('#pv').click():go(Math.max(0,i-1));else if(k=='nx')q$('#nx')?q$('#nx').click():go(Math.min(D.length-1,i+1));
+  else if(k=='tools')toolsMenu();else if(k=='exit')q$('#bg').click();
+  else{var t=q$('#tl [data-t="'+k+'"]');t&&t.click()}};
+ setInterval(function(){if(!document.body.classList.contains('big'))return;
+  var r=!!Rc||!!BUSYREC;var rb=f.querySelector('[data-f=rec]');rb.textContent=r?'■':'●';rb.className=r?'r':'p';
+  f.querySelector('[data-f=ps]').hidden=!Rc;f.querySelector('#ft')||0;
+  var ft=q$('#ft',f);ft.textContent=r?(q$('#tm').textContent||'').replace(/[^\d:]/g,'').slice(0,5):'';
+  f.querySelectorAll('[data-f]').forEach(function(b){if(['none','pen','touch','laser'].indexOf(b.dataset.f)>=0)b.classList.toggle('on',b.dataset.f==TL.tool)})},300);
+})();
 /* ============ صفحه‌ی بزرگ / تمام‌صفحه ============ */
 (function(){
  var css=document.createElement('style');css.textContent='body.big header,body.big #th,body.big #ed{display:none}body.big main{grid-template-columns:1fr;padding:6px;max-width:none}body.big canvas#cv{width:min(100%,calc((100vh - 170px)*16/9));margin:0 auto}body.big .bar{margin:6px 0}@media(max-height:520px){body.big canvas#cv{width:100%}}';
