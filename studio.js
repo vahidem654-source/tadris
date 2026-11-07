@@ -99,6 +99,8 @@ async function importImages(f){
 var PGI=new WeakMap();
 window.drawPg=function(Z){var e=PGI.get(Z);if(!e||e.s!==Z.pg){var im=new Image();im.onload=function(){dirty=true};im.src=Z.pg;e={im:im,s:Z.pg};PGI.set(Z,e)}
  if(e.im.complete&&e.im.naturalWidth)X.drawImage(e.im,0,0,1280,720)};
+var TS={c:'#ffffff',z:26};try{Object.assign(TS,JSON.parse(localStorage.ss_ts||'{}'))}catch(e){}
+var rg=function(h,a){var n=parseInt(h.slice(1),16);return'rgba('+(n>>16)+','+(n>>8&255)+','+(n&255)+','+a+')'};
 var TL={tool:'none',color:'#e0332b',w:6},INK={},ptrs=new Map(),taps=[],live=null,TR=null,BUSYREC=false;
 var VO=null;
 var inkKey=function(){return VO?'vo':i};
@@ -112,11 +114,11 @@ window.ovl=function(){
  X.save();X.lineCap='round';X.lineJoin='round';
  L.concat(live&&live.p.length?[live]:[]).forEach(function(s){X.strokeStyle=s.c;X.lineWidth=s.w;X.beginPath();s.p.forEach(function(p,j){j?X.lineTo(p[0],p[1]):X.moveTo(p[0],p[1])});if(s.p.length==1)X.lineTo(s.p[0][0]+.1,s.p[0][1]);X.stroke()});
  if(TL.tool=='touch'||TL.tool=='laser'){
-  taps.forEach(function(t){var a=(n-t.t)/700;if(a>=1)return;X.strokeStyle='rgba(255,255,255,'+(.8*(1-a))+')';X.lineWidth=5;X.beginPath();X.arc(t.x,t.y,24+a*40,0,7);X.stroke()});
+  taps.forEach(function(t){var a=(n-t.t)/700;if(a>=1)return;X.strokeStyle=rg(TS.c,.8*(1-a));X.lineWidth=5;X.beginPath();X.arc(t.x,t.y,TS.z-2+a*TS.z*1.5,0,7);X.stroke()});
   ptrs.forEach(function(o){
    if(TL.tool=='laser'){var gr=X.createRadialGradient(o.x,o.y,0,o.x,o.y,34);gr.addColorStop(0,'rgba(255,60,60,.95)');gr.addColorStop(.35,'rgba(255,40,40,.5)');gr.addColorStop(1,'rgba(255,0,0,0)');X.fillStyle=gr;X.beginPath();X.arc(o.x,o.y,34,0,7);X.fill();X.fillStyle='#fff';X.beginPath();X.arc(o.x,o.y,5,0,7);X.fill();return}
-   if(o.tr.length>1)for(var j=1;j<o.tr.length;j++){var a=o.tr[j-1],b=o.tr[j],al=Math.max(0,1-(n-b.t)/450);X.strokeStyle='rgba(255,255,255,'+(.45*al)+')';X.lineWidth=22*al+2;X.beginPath();X.moveTo(a.x,a.y);X.lineTo(b.x,b.y);X.stroke()}
-   X.fillStyle='rgba(255,255,255,.38)';X.strokeStyle='rgba(255,255,255,.95)';X.lineWidth=4;X.beginPath();X.arc(o.x,o.y,26,0,7);X.fill();X.stroke();X.strokeStyle='rgba(0,0,0,.35)';X.lineWidth=1.5;X.beginPath();X.arc(o.x,o.y,28,0,7);X.stroke()})}
+   if(o.tr.length>1)for(var j=1;j<o.tr.length;j++){var a=o.tr[j-1],b=o.tr[j],al=Math.max(0,1-(n-b.t)/450);X.strokeStyle=rg(TS.c,.45*al);X.lineWidth=TS.z*.85*al+2;X.beginPath();X.moveTo(a.x,a.y);X.lineTo(b.x,b.y);X.stroke()}
+   X.fillStyle=rg(TS.c,.38);X.strokeStyle=rg(TS.c,.95);X.lineWidth=4;X.beginPath();X.arc(o.x,o.y,TS.z,0,7);X.fill();X.stroke();X.strokeStyle='rgba(0,0,0,.35)';X.lineWidth=1.5;X.beginPath();X.arc(o.x,o.y,TS.z+2,0,7);X.stroke()})}
  X.restore();
  if(TR){var t=(n-TR.t0)/TR.d;if(t>=1)TR=null;else{X.save();X.setTransform(1,0,0,1,0,0);X.globalAlpha=1-t;X.drawImage(TR.img,0,0,cv.width,cv.height);X.restore()}}};
 function cpt(e){var r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*1280,y:(e.clientY-r.top)/r.height*720}}
@@ -134,10 +136,11 @@ cv.addEventListener('pointerup',pUp,true);cv.addEventListener('pointercancel',pU
 cv.addEventListener('touchmove',function(e){if(TL.tool!='none')e.preventDefault()},{passive:false});
 function buildTools(){var b=q$('#tl');b.innerHTML='<span style="font-size:13px;opacity:.8">ابزار حین ضبط:</span>'+
  [['none','🖐 بدون ابزار / اسکرول'],['pen','✎ قلم'],['touch','👆 فقط نشان‌دادن لمس'],['laser','🔴 لیزر']].map(function(a){return'<button data-t="'+a[0]+'">'+a[1]+'</button>'}).join('')+
- '<input type="color" id="tcol" value="'+TL.color+'"><select id="tw"><option value="3">نازک</option><option value="6" selected>متوسط</option><option value="12">ضخیم</option></select><button id="tun">↶</button><button id="tcl">🧹 پاک‌کردن خط‌های این اسلاید</button>';
+ '<input type="color" id="tcol" value="'+TL.color+'"><select id="tw"><option value="3">نازک</option><option value="6" selected>متوسط</option><option value="12">ضخیم</option></select><span style="font-size:13px">👆 رنگ لمس</span><input type="color" id="tcl2" value="'+TS.c+'"><input type="range" id="tsz2" min="10" max="70" value="'+TS.z+'" title="اندازه‌ی نشانگر لمس" style="width:90px"><button id="tun">↶</button><button id="tcl">🧹 پاک‌کردن خط‌های این اسلاید</button>';
  function sync(){b.querySelectorAll('[data-t]').forEach(function(x){x.classList.toggle('on',x.dataset.t==TL.tool)});cv.style.touchAction=TL.tool=='none'?'':'none';cv.style.cursor=TL.tool=='none'?'':'crosshair'}
  b.onclick=function(e){var t=e.target.closest('[data-t]');if(t){TL.tool=t.dataset.t;sync();dirty=true}};
- q$('#tcol').oninput=function(e){TL.color=e.target.value};q$('#tw').onchange=function(e){TL.w=+e.target.value};
+ q$('#tcol').oninput=function(e){TL.color=e.target.value};
+ var svTS=function(){try{localStorage.ss_ts=JSON.stringify(TS)}catch(x){}};q$('#tcl2').oninput=function(e){TS.c=e.target.value;svTS();dirty=true};q$('#tsz2').oninput=function(e){TS.z=+e.target.value;svTS();dirty=true};q$('#tw').onchange=function(e){TL.w=+e.target.value};
  q$('#tun').onclick=function(){var l=INK[inkKey()];if(l&&l.length){l.pop();dirty=true}};
  q$('#tcl').onclick=function(){INK[inkKey()]=[];dirty=true};sync()}
 buildTools();
@@ -555,17 +558,18 @@ function toolsMenu(){
 q$('#tl_').onclick=toolsMenu;
 
 
+function touchSet(){var o=modal('<b>👆 رنگ و اندازه‌ی نشانگر لمس</b><label>رنگ <input type="color" id="ts1" value="'+TS.c+'"></label><label>اندازه <input type="range" id="ts2r" min="10" max="70" value="'+TS.z+'" style="width:100%"></label><button class="p" id="ts3">تأیید</button>');q$('#ts1',o).oninput=function(e){TS.c=e.target.value;dirty=true};q$('#ts2r',o).oninput=function(e){TS.z=+e.target.value;dirty=true};q$('#ts3',o).onclick=function(){try{localStorage.ss_ts=JSON.stringify(TS)}catch(x){}var a=q$('#tcl2'),b=q$('#tsz2');if(a)a.value=TS.c;if(b)b.value=TS.z;o.remove()}}
 /* ============ نوار ابزار شناور سمت چپ (در حالت صفحه‌ی بزرگ) ============ */
 (function(){
  var css=document.createElement('style');css.textContent='#fp{display:none;position:fixed;left:4px;top:50%;transform:translateY(-50%);z-index:40;flex-direction:column;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px;max-height:96vh;overflow-y:auto;opacity:.96}#fp button{width:46px;height:46px;padding:0;font-size:20px;line-height:1}#fp button.on{background:var(--acc);color:var(--bg)}#fp #ft{font-size:11px;text-align:center;direction:ltr;min-height:14px}body.big #fp{display:flex}body.big main{margin-left:62px}body.big{overflow-y:auto}body.big .bar{display:none}body.big #out .bar,body.big #vob{display:flex}';
  document.head.appendChild(css);
  var f=document.createElement('div');f.id='fp';
- f.innerHTML='<button data-f="rec" title="شروع/توقف ضبط">●</button><div id="ft"></div><button data-f="ps" title="مکث" hidden>⏸</button><button data-f="none" title="بدون ابزار / اسکرول صفحه">🖐</button><button data-f="pen" title="قلم">✎</button><button data-f="touch" title="فقط نشان‌دادن لمس">👆</button><button data-f="laser" title="لیزر">🔴</button><button data-f="un" title="برگردان آخرین خط">↶</button><button data-f="cl" title="پاک‌کردن خط‌ها">🧹</button><button data-f="pv" title="اسلاید قبلی">▲</button><button data-f="nx" title="اسلاید بعدی">▼</button><button data-f="tools" title="ابزارها">🧰</button><button data-f="exit" title="کوچک‌کردن">⮌</button>';
+ f.innerHTML='<button data-f="rec" title="شروع/توقف ضبط">●</button><div id="ft"></div><button data-f="ps" title="مکث" hidden>⏸</button><button data-f="none" title="بدون ابزار / اسکرول صفحه">🖐</button><button data-f="pen" title="قلم">✎</button><button data-f="touch" title="فقط نشان‌دادن لمس">👆</button><button data-f="laser" title="لیزر">🔴</button><button data-f="un" title="برگردان آخرین خط">↶</button><button data-f="cl" title="پاک‌کردن خط‌ها">🧹</button><button data-f="pv" title="اسلاید قبلی">▲</button><button data-f="nx" title="اسلاید بعدی">▼</button><button data-f="tset" title="رنگ و اندازه‌ی نشانگر لمس">🎨</button><button data-f="tools" title="ابزارها">🧰</button><button data-f="exit" title="کوچک‌کردن">⮌</button>';
  document.body.appendChild(f);
  f.onclick=function(e){var b=e.target.closest('[data-f]');if(!b)return;var k=b.dataset.f;
   if(k=='rec')q$('#rec').click();else if(k=='ps')q$('#ps2').click();else if(k=='un')q$('#tun').click();else if(k=='cl')q$('#tcl').click();
   else if(k=='pv')q$('#pv')?q$('#pv').click():go(Math.max(0,i-1));else if(k=='nx')q$('#nx')?q$('#nx').click():go(Math.min(D.length-1,i+1));
-  else if(k=='tools')toolsMenu();else if(k=='exit')q$('#bg').click();
+  else if(k=='tset')touchSet();else if(k=='tools')toolsMenu();else if(k=='exit')q$('#bg').click();
   else{var t=q$('#tl [data-t="'+k+'"]');t&&t.click()}};
  setInterval(function(){if(!document.body.classList.contains('big'))return;
   var r=!!Rc||!!BUSYREC;var rb=f.querySelector('[data-f=rec]');rb.textContent=r?'■':'●';rb.className=r?'r':'p';
