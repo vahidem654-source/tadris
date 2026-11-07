@@ -1,349 +1,241 @@
-<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#0E1320"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><title>اسلایدساز</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>استودیو اسلاید</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#8b5a2b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0E1320;--pn:#171E30;--tx:#E8ECF6;--ac:#35E0C2;--ln:#2A3350}
-html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-family:Vazirmatn,Tahoma,system-ui,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none}
-#c{position:fixed;left:0;top:0;touch-action:none;background:#fff;box-shadow:0 6px 30px #0008}
-.pn{position:fixed;background:var(--pn);border:1px solid var(--ln);border-radius:18px;box-shadow:0 8px 28px #0006;transition:transform .2s,opacity .2s}
-.pn.h{opacity:0;pointer-events:none;transform:translateY(20px)}
-#bar{left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));padding:8px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center}
-#sh{left:8px;right:8px;bottom:calc(150px + env(safe-area-inset-bottom));max-width:480px;margin:auto;padding:12px;display:flex;flex-direction:column;gap:10px;font-size:14px;overflow-y:auto;max-height:calc(100% - 170px);touch-action:pan-y}
-.r{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-button,.b{font:inherit;color:var(--tx);border:1px solid var(--ln);background:transparent;border-radius:12px;padding:8px 12px;min-height:40px;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
-button:disabled{opacity:.45}
-.t{min-width:42px;height:42px;padding:0;border:0;font-size:21px}
-.on,.b.p{background:var(--ac);color:#06201b;border-color:var(--ac)}
-.sw{width:26px;height:26px;min-height:0;padding:0;border-radius:50%}
-#col{width:34px;height:34px;border:0;padding:0;background:none}
-#wd{width:90px;accent-color:var(--ac)}
-input[type=number]{width:64px;font:inherit;background:transparent;color:var(--tx);border:1px solid var(--ln);border-radius:10px;padding:8px}
-select{font:inherit;background:var(--pn);color:var(--tx);border:1px solid var(--ln);border-radius:10px;padding:6px}
-#nav{flex:0 0 100%;display:flex;gap:8px;align-items:center}#nav input{flex:1;accent-color:var(--ac)}
-#side{position:fixed;left:6px;top:36%;display:flex;flex-direction:column;gap:8px;align-items:center;z-index:5}
-#side button{width:40px;height:40px;min-height:0;padding:0;border-radius:50%;background:var(--pn);opacity:.9;font-size:17px}
-#rb{color:#ff4d6d}#tm{font-size:12px;background:var(--pn);border-radius:8px;padding:2px 6px}
-#cd{position:fixed;inset:0;display:none;align-items:center;justify-content:center;font-size:120px;color:var(--ac);background:#0008;pointer-events:none;z-index:50}
-#ts{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--pn);padding:8px 14px;border-radius:12px;font-size:13px;opacity:0;transition:.2s;pointer-events:none;z-index:70;max-width:90%;text-align:center}
-#home{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;text-align:center;line-height:1.9;z-index:10;background:var(--bg);touch-action:pan-y;overflow-y:auto}
-#home img{width:96px;height:96px;border-radius:22px}#home h1{margin:0;font-size:26px}#home p{margin:0;max-width:440px;opacity:.85;font-size:14px}
-#home .b{font-size:17px;padding:14px 22px}
-#wn{position:fixed;top:8px;right:8px;left:8px;background:#3a2b12;color:#ffd9a0;border:1px solid #7a5a22;border-radius:12px;padding:8px 12px;font-size:12.5px;line-height:1.8;z-index:30;display:none;touch-action:auto}
-#wn button{min-height:28px;padding:2px 10px;margin-inline-start:8px}
-.ov{position:fixed;inset:0;background:#000b;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px}
-.ov .pn{position:static;padding:16px;max-width:380px;width:100%;line-height:1.9;display:flex;flex-direction:column;gap:10px;font-size:14px;max-height:92%;overflow-y:auto;touch-action:pan-y}
-.ov.run{background:transparent;align-items:flex-start;pointer-events:none}.ov.run .pn{pointer-events:auto}
-#gl{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:6px}#gl label{font-size:12px;display:flex;gap:4px;align-items:center}#gl input{width:46px}
-@media (orientation:landscape) and (max-height:600px){
- #bar{left:auto;right:6px;top:6px;bottom:6px;width:112px;flex-direction:row;flex-wrap:wrap;align-content:flex-start;justify-content:center;overflow-y:auto;touch-action:pan-y;padding:6px;gap:4px}
- .t{min-width:38px;height:38px;font-size:18px}#wd{width:100%}.sw{width:22px;height:22px}
- #sh{left:60px;right:126px;top:8px;bottom:8px;max-width:none;max-height:none;margin:0}#side{top:6px}#side button{width:36px;height:36px}
-}
-</style></head><body>
-<canvas id="c"></canvas>
-<div id="wn"></div>
-<div id="home"><img src="icon-192.png" alt=""><h1>اسلایدساز</h1>
-<p>فایل پاورپوینت (pptx) یا PDF را باز کن. می‌توانی روی اسلایدها بنویسی و با صدای خودت ضبط کنی، یا برنامه خودش از اسلایدها یک کلیپ بی‌صدا (یا با آهنگ) بسازد.</p>
-<label class="b p">📂 انتخاب پاورپوینت یا PDF<input type="file" accept=".pptx,.ppsx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation" hidden id="fo"></label>
-<button data-a="vo" class="b">🎙 صدا گذاشتن روی یک کلیپ آماده</button>
-<p style="font-size:12px;opacity:.65">اگر ظاهر اسلایدی با پاورپوینت فرق داشت (مثلاً نمودار یا SmartArt)، همان فایل را از پاورپوینت به PDF تبدیل کن و PDF را باز کن؛ ظاهرش دقیقاً مثل اصل می‌شود.</p></div>
-<div id="side" style="display:none"><button id="mn" title="منو">☰</button><button id="pv" title="اسلاید قبل">⏮</button><button id="nx" title="اسلاید بعد">⏭</button><button id="qu" title="برگردان">↶</button><button id="cl" title="پاک کردن نوشته‌های این اسلاید">🧹</button><button id="vp" style="display:none" title="پخش/توقف پیش‌نمایش کلیپ">▶</button><button id="vx" style="display:none" title="خروج از حالت کلیپ">✖</button><button id="rb" title="ضبط">●</button><button id="ps" style="display:none">⏸</button><span id="tm" style="display:none">00:00</span></div>
-<div id="bar" class="pn h"></div>
-<div id="sh" class="pn h">
- <div class="r"><label class="b p">📂 فایل دیگر<input type="file" accept=".pptx,.ppsx,.pdf,application/pdf" hidden id="fo2"></label><button data-a="gen" class="b">🎞 ساخت کلیپ خودکار</button><button data-a="music" class="b">🎵 آهنگ روی کلیپ…</button><button data-a="vo" class="b">🎙 صدا (و آهنگ) روی کلیپ آماده…</button><button data-a="topptx" class="b">📤 ساخت پاورپوینت از این فایل</button></div>
- <div class="r"><button data-a="imgs" class="b">🖼 تصویرهای داخل فایل…</button><button data-a="wiz" class="b p">🪄 ساخت ارائه‌ی تازه با تصویرهای مرتبط…</button><button data-a="aiset" class="b">⚙ تنظیمات Claude و تصویرساز</button><button data-a="back" class="b" id="bk" style="display:none">↩ برگشت به فایل اصلی</button></div>
- <div class="r"><label>کیفیت ویدیو: <select id="ql"><option value="1280">۷۲۰ (سبک)</option><option value="1920">۱۰۸۰ (دقیق‌تر)</option></select></label></div>
- <div class="r"><label><input type="checkbox" id="po"> با انگشت ننویس (فقط قلم/ماوس)</label></div>
- <div class="r"><label><input type="checkbox" id="cm"> دوربین (چهره) روی کلیپ</label></div>
- <div class="r"><label><input type="checkbox" id="tc"> نمایش لمس‌ها و حرکت انگشت در کلیپ (بدون کشیدن خط)</label></div>
+@font-face{font-family:'B Nazanin';font-weight:400;src:local('B Nazanin'),local('BNazanin'),url('BNazanin.ttf')}
+@font-face{font-family:'B Nazanin';font-weight:700;src:local('B Nazanin Bold'),local('BNazanin-Bold'),local('B Nazanin'),url('BNazanin.ttf')}
+:root{--bg:#f6efe2;--card:#fffaf0;--ink:#4a3222;--acc:#8b5a2b;--line:#dccfb8;color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-th=light]){--bg:#241a14;--card:#32251c;--ink:#f1e6d3;--acc:#c89560;--line:#5a4636;color-scheme:dark}}
+:root[data-th=dark]{--bg:#241a14;--card:#32251c;--ink:#f1e6d3;--acc:#c89560;--line:#5a4636;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Vazirmatn,Tahoma,sans-serif;background:var(--bg);color:var(--ink);padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+header{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--line)}
+header b{font-size:18px;color:var(--acc);margin-inline-end:auto}
+button,.btn,select,input,textarea{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:7px 11px}
+button,.btn{cursor:pointer;text-decoration:none;display:inline-block}
+button.p,.btn.p{background:var(--acc);color:var(--bg);border-color:var(--acc)}
+button.r{background:#a63c2a;color:#fff;border-color:#a63c2a}
+main{display:grid;grid-template-columns:150px 1fr 320px;gap:12px;padding:12px;max-width:1500px;margin:auto}
+#th{display:flex;flex-direction:column;gap:6px}
+#th button{text-align:start;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#th button.on{background:var(--acc);color:var(--bg)}
+canvas{width:100%;aspect-ratio:16/9;border:1px solid var(--line);border-radius:12px;display:block}
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
+#ed{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;align-self:start}
+#ed label{font-size:13px;opacity:.85;display:flex;flex-direction:column;gap:3px}
+#ed textarea{min-height:90px;resize:vertical}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+video{width:100%;border-radius:12px;margin-top:8px}
+@media(max-width:900px){main{grid-template-columns:1fr}#th{flex-direction:row;overflow-x:auto}#th button{min-width:110px}}
+</style>
+</head>
+<body>
+<header>
+<b>🎞 استودیو اسلاید</b>
+<a class="btn" href="board.html">🧑‍🏫 تخته تدریس</a>
+<label class="btn">📂 ورود PPTX / PDF<input id="imp" type="file" accept=".pptx,.ppsx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation" hidden></label>
+<button id="tl_" class="p">🧰 ابزارها</button>
+<button id="ins">⬇ نصب برنامه</button>
+<button id="tg">🌓 شب/روز</button>
+</header>
+<main>
+<div id="th"></div>
+<section>
+<canvas id="cv" width="1280" height="720"></canvas>
+<div class="bar">
+<button id="pv">◀ قبلی</button><span id="no"></span><button id="nx">بعدی ▶</button>
+<select id="q"><option value="l">کیفیت: کم‌حجم (480p)</option><option value="m" selected>کیفیت: متوسط (720p)</option><option value="h">کیفیت: بالا (1080p)</option></select>
+<button id="rec" class="p">● شروع ضبط</button><button id="ps2" hidden>⏸ مکث</button><button id="as">🎙 صدا</button><span id="tm"></span>
 </div>
-<div id="cd"></div><div id="ts"></div>
-<script src="lib/jszip.min.js"></script><script src="lib/pptx.js"></script>
+<div class="bar" id="tl"></div>
+<div id="out"></div>
+</section>
+<section id="ed">
+<label>عنوان<input id="t"></label>
+<label>متن<textarea id="b"></textarea></label>
+<div class="row" id="ir"><label class="btn">🖼 افزودن تصویر<input id="ai" type="file" accept="image/*" multiple hidden></label><button id="ci">حذف تصاویر</button></div>
+<div class="row">
+<label>نوع اسلاید<select id="k"><option value="text">متن</option><option value="table">جدول</option><option value="chart">نمودار</option><option value="img" hidden>تصویر کامل صفحه</option></select></label>
+<label>فونت<select id="f"></select></label>
+</div>
+<label>اندازه فونت: <span id="sv"></span><input id="s" type="range" min="20" max="60"></label>
+<label id="dl_"><span id="dh"></span><textarea id="d"></textarea></label>
+<label id="cl_">نوع نمودار<select id="c"><option value="bar">ستونی</option><option value="line">خطی</option><option value="pie">دایره‌ای</option></select></label>
+<div class="row"><button id="add" class="p">+ اسلاید</button><button id="dup">کپی</button><button id="up">↑</button><button id="dn">↓</button><button id="del">حذف</button></div>
+</section>
+</main>
+<script src="jszip.min.js"></script><script>if(typeof JSZip=="undefined"){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>')}</script><script src="pptx.js"></script>
 <script>
-const $=s=>document.querySelector(s),cv=$('#c'),cx=cv.getContext('2d'),bar=$('#bar'),sh=$('#sh'),vid=document.createElement('video');
-const mk=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
-const toast=t=>{const e=$('#ts');e.textContent=t;e.style.opacity=1;clearTimeout(e.t);e.t=setTimeout(()=>e.style.opacity=0,2600)};
-const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
-const mmss=t=>{t=Math.max(0,Math.floor(t||0));return String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0')};
-const dlBlob=(b,n)=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(a.href)},8000)};
-const raf=()=>new Promise(r=>requestAnimationFrame(r));
-function ask(html,buttons){return new Promise(res=>{const o=document.createElement('div');o.className='ov';o.innerHTML=`<div class="pn" style="text-align:center"><p style="margin:0">${html}</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">${buttons.map((b,i)=>`<button class="${i==0?'on':''}" data-i="${i}">${b}</button>`).join('')}</div></div>`;
- o.onclick=e=>{const b=e.target.closest('button');if(b){o.remove();res(+b.dataset.i)}};document.body.appendChild(o)})}
-// ---------- state
-let S={tool:'pen',color:'#ff3b5c',w:5,po:false,q:1280,cam:0,touch:0};
-try{Object.assign(S,JSON.parse(localStorage.sl||'{}'))}catch{}
-const saveS=()=>{try{localStorage.sl=JSON.stringify({q:S.q,po:S.po,color:S.color,w:S.w,touch:S.touch})}catch{}};
-let ovl={},objSel=null,vo=null,src=null,cur=0,OW=1280,OH=720,cache=new Map(),ink={},rdo={},inkC={},dirty=1,rec=null,gen=null,live=null,drawing=null,laser=null,lastClip=null,cam={on:0};
-// ---------- toolbar
-const T=[['pen','✎','قلم'],['hl','▮','هایلایت'],['eraser','⌫','پاک‌کن'],['line','╱','خط'],['rect','▭','مربع'],['circ','◯','دایره'],['laser','🔴','اشاره‌گر لیزری (اثر نمی‌گذارد)'],['touch','👆','نمایش لمس و حرکت انگشت بدون کشیدن خط'],['obj','✥','جابه‌جایی و تغییر اندازه‌ی عکس‌های روی اسلاید']];
-bar.innerHTML='<div id="nav"><button class="t" data-a="prev">▶</button><input type="range" id="sl" min="1" max="1" value="1"><span id="lab" style="min-width:64px;text-align:center">-</span><button class="t" data-a="next">◀</button></div>'+
- T.map(([a,i,t])=>`<button class="t" data-k="${a}" title="${t}">${i}</button>`).join('')+'<input type="color" id="col" value="#ff3b5c">'+
- ['#ff3b5c','#35e0c2','#ffd166','#6c8bff','#111111','#ffffff'].map(c=>`<button class="sw" style="background:${c}" data-c="${c}"></button>`).join('')+
- '<input type="range" id="wd" min="1" max="30" value="5"><button class="t" data-a="undo">↶</button><button class="t" data-a="redo">↷</button><button class="t" data-a="delobj" title="حذف عکس انتخاب‌شده">🗑</button>';
-function ui(){bar.querySelectorAll('[data-k]').forEach(b=>b.classList.toggle('on',b.dataset.k==S.tool));$('#col').value=S.color;$('#wd').value=S.w;$('#ql').value=S.q;$('#po').checked=S.po;$('#tc').checked=!!S.touch;
- if(vo){$('#sl').max=vo.dur;$('#sl').step=.1;$('#sl').value=vo.v.currentTime;$('#lab').textContent=mmss(vo.v.currentTime)+'/'+mmss(vo.dur)}
- else if(src){$('#sl').step=1;$('#sl').max=src.n;$('#sl').value=cur+1;$('#lab').textContent=fa(cur+1)+' / '+fa(src.n)}}
-document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
- if(d.k){S.tool=d.k;ui()}else if(d.c){S.color=d.c;ui();saveS()}else if(d.a=='undo')undo();else if(d.a=='redo')redo();else if(d.a=='prev')nav(-1);else if(d.a=='next')nav(1);
- else if(d.a=='gen')genDlg();else if(d.a=='music')musicDlg();else if(d.a=='vo')voDlg();else if(d.a=='topptx')exportPptx();else if(d.a=='imgs')imgDlg();else if(d.a=='wiz')wizDlg();else if(d.a=='aiset')aiDlg();else if(d.a=='delobj')delObj();else if(d.a=='back')backOrig()});
-const nav=d=>{if(vo){vo.v.currentTime=Math.max(0,Math.min(vo.dur,vo.v.currentTime+d*5));dirty=1}else go(cur+d)};
-$('#col').oninput=e=>{S.color=e.target.value;saveS()};$('#wd').oninput=e=>{S.w=+e.target.value;saveS()};
-$('#sl').oninput=e=>{if(vo){vo.v.currentTime=+e.target.value;dirty=1}else go(+e.target.value-1)};
-// 3-state menu: toolbar hidden -> toolbar -> toolbar+settings -> hidden
-$('#mn').onclick=()=>{const bh=bar.classList.contains('h'),sh_=sh.classList.contains('h');if(bh){bar.classList.remove('h')}else if(sh_){sh.classList.remove('h')}else{sh.classList.add('h');bar.classList.add('h')}};
-$('#pv').onclick=()=>nav(-1);$('#nx').onclick=()=>nav(1);$('#vp').onclick=()=>{if(!vo)return;const v=vo.v;if(v.paused){if(v.ended||v.currentTime>=vo.dur-.05)v.currentTime=0;v.play().catch(()=>{})}else v.pause()};$('#vx').onclick=()=>{if(rec)return;endVo()};
-$('#tc').onchange=e=>{S.touch=e.target.checked?1:0;saveS()};$('#qu').onclick=()=>undo();$('#cl').onclick=()=>clearInk();
-$('#ql').onchange=e=>{S.q=+e.target.value;saveS();if(src&&!vo)setupSize()};$('#po').onchange=e=>{S.po=e.target.checked;saveS()};
-addEventListener('keydown',e=>{if(!(src||vo)||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)&&e.target.type!=='range')return;
- if(['ArrowLeft','PageUp'].includes(e.key)&&false)return;
- if(['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)){nav(1);e.preventDefault()}else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){nav(-1);e.preventDefault()}
- else if((e.ctrlKey||e.metaKey)&&e.key=='z')undo()});
-// ---------- loading
-let pdfjs=null;async function getPdf(){if(!pdfjs){pdfjs=await import('./lib/pdf.min.mjs');pdfjs.GlobalWorkerOptions.workerSrc='./lib/pdf.worker.min.mjs'}return pdfjs}
-function busyMsg(t){let o=$('#bz');if(!t){o&&o.remove();return}if(!o){o=document.createElement('div');o.id='bz';o.className='ov';o.innerHTML='<div class="pn" style="text-align:center"><span id="bzt"></span></div>';document.body.appendChild(o)}$('#bzt').textContent=t}
-async function openFile(f,restore){busyMsg('در حال باز کردن فایل…');
- try{try{await Promise.race([document.fonts.load('18px Vazirmatn'),new Promise(r=>setTimeout(r,1500))])}catch{}
-  const name=f.name||'file';let ns=null;
-  if(/\.pdf$/i.test(name)||f.type==='application/pdf'){const pd=await getPdf();const doc=await pd.getDocument({data:new Uint8Array(await f.arrayBuffer())}).promise,p1=await doc.getPage(1),vp=p1.getViewport({scale:1});
-   ns={kind:'pdf',doc,n:doc.numPages,ratio:vp.height/vp.width,name,hidden:[],render:async(i,c,w)=>{const pg=await doc.getPage(i+1),v0=pg.getViewport({scale:1}),v=pg.getViewport({scale:w/v0.width});c.width=Math.round(v.width);c.height=Math.round(v.height);const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);await pg.render({canvasContext:g,viewport:v}).promise}}}
-  else if(/\.(pptx|ppsx)$/i.test(name)){const d=await PPTX.load(await f.arrayBuffer());if(!d.slides.length)throw new Error('empty');ns={kind:'pptx',n:d.slides.length,ratio:d.h/d.w,name,hidden:d.slides.map(s=>s.hidden),deck:d,render:(i,c,w)=>d.render(i,c,w)}}
-  else{busyMsg();await ask('این قالب پشتیبانی نمی‌شود. فایل را در پاورپوینت باز کن و «ذخیره با نام» را روی <b>pptx</b> یا <b>PDF</b> بگذار؛ بعد همین‌جا باز کن.',['باشه']);return}
-  src=ns;ovl={};objSel=null;try{stash=null}catch(e){}try{$('#bk').style.display='none'}catch(e){}cache.clear();inkC={};ink={};rdo={};cur=0;$('#home').style.display='none';$('#side').style.display='flex';setupSize();bar.classList.remove('h');
-  if(!restore)cput('deck',{id:'deck',name,blob:f});
-  await getSlide(0).p;go(0);busyMsg();showWarn(f)}
- catch(e){console.error(e);busyMsg();toast('این فایل باز نشد؛ اگر پاورپوینت است آن را به PDF تبدیل کن')}}
-function showWarn(){const w=$('#wn');if(!src||src.kind!=='pptx'||!src.deck.warnings.size){w.style.display='none';return}
- w.innerHTML='⚠ در این فایل چیزهایی بود که کامل نمایش داده نمی‌شود: '+[...src.deck.warnings].join('، ')+'. اگر ظاهرش مهم است، فایل را از پاورپوینت به PDF تبدیل کن و PDF را باز کن.<button id="wx">باشه</button>';w.style.display='block';$('#wx').onclick=()=>w.style.display='none'}
-$('#fo').onchange=$('#fo2').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)openFile(f)};
-// ---------- slide cache
-function getSlide(i){let e=cache.get(i);if(e)return e;const c=mk(OW,Math.round(OW*src.ratio));e={c,ready:false};e.p=Promise.resolve(src.render(i,c,OW)).then(()=>{e.ready=true;dirty=1;return c}).catch(err=>{console.error(err);e.ready=true;e.failed=true;dirty=1;return c});cache.set(i,e);
- if(cache.size>7){let far=null,fd=-1;for(const k of cache.keys()){const dd=Math.abs(k-cur);if(dd>fd&&k!==i&&!(gen&&(k===gen.a||k===gen.b))){fd=dd;far=k}}if(far!=null)cache.delete(far)}return e}
-function setupSize(){OW=S.q;OH=Math.round(OW*src.ratio/2)*2;OW=Math.round(OW/2)*2;cv.width=OW;cv.height=OH;cache.clear();inkC={};for(let i=0;i<src.n;i++)if(ink[i]&&ink[i].length)inkC[i]=null;fit();getSlide(cur);dirty=1}
-function fit(){if(!src&&!vo)return;const vw=innerWidth,vh=innerHeight,s=Math.min(vw/OW,vh/OH);cv.style.width=OW*s+'px';cv.style.height=OH*s+'px';cv.style.left=(vw-OW*s)/2+'px';cv.style.top=(vh-OH*s)/2+'px'}
-addEventListener('resize',fit);
-function go(i){if(!src)return;if(gen)return;cur=Math.max(0,Math.min(src.n-1,i));live=drawing=null;getSlide(cur);for(const d of [1,-1,2])if(cur+d>=0&&cur+d<src.n)getSlide(cur+d);ui();dirty=1;scheduleSave()}
-// ---------- ink
-const ik=()=>vo?'vo':cur;
-const lw=s=>s.tool=='eraser'?s.w*4:s.tool=='hl'?s.w*3:s.w;
-function sty(c,s){c.lineCap=c.lineJoin='round';c.lineWidth=lw(s)*(OW/1280);c.strokeStyle=s.color;if(s.tool=='eraser')c.globalCompositeOperation='destination-out';if(s.tool=='hl')c.globalAlpha=.35}
-function paint(c,s){c.save();sty(c,s);const p=s.pts,a=p[0],b=p[p.length-1];c.beginPath();
- if(s.tool=='line'){c.moveTo(a.x,a.y);c.lineTo(b.x,b.y)}else if(s.tool=='rect')c.rect(a.x,a.y,b.x-a.x,b.y-a.y);
- else if(s.tool=='circ')c.ellipse((a.x+b.x)/2,(a.y+b.y)/2,Math.abs(b.x-a.x)/2,Math.abs(b.y-a.y)/2,0,0,7);
- else{c.moveTo(a.x,a.y);for(let i=1;i<p.length-1;i++)c.quadraticCurveTo(p[i].x,p[i].y,(p[i].x+p[i+1].x)/2,(p[i].y+p[i+1].y)/2);c.lineTo(b.x,b.y)}c.stroke();c.restore()}
-function inkCv(i){if(!(ink[i]&&ink[i].length))return null;let c=inkC[i];if(!c){c=inkC[i]=mk(OW,OH);redrawInk(i)}return c}
-function redrawInk(i){const c=inkC[i]||(inkC[i]=mk(OW,OH)),g=c.getContext('2d');g.clearRect(0,0,OW,OH);(ink[i]||[]).forEach(s=>s.tool=='clear'?g.clearRect(0,0,OW,OH):paint(g,s));dirty=1}
-function undo(){const K=ik(),a=ink[K];if(a&&a.length){(rdo[K]=rdo[K]||[]).push(a.pop());redrawInk(K);scheduleSave()}}
-function redo(){const K=ik(),r=rdo[K];if(r&&r.length){(ink[K]=ink[K]||[]).push(r.pop());redrawInk(K);scheduleSave()}}
-function clearInk(){const K=ik(),a=ink[K]||(ink[K]=[]),l=a[a.length-1];if(!l||l.tool=='clear'){toast('چیزی برای پاک کردن نیست');return}a.push({tool:'clear',color:'#000',w:1,pts:[]});rdo[K]=[];redrawInk(K);scheduleSave();toast('نوشته‌های این اسلاید پاک شد (↶ برمی‌گرداند)')}
-const pt=e=>{const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*OW/r.width,y:(e.clientY-r.top)*OH/r.height}};
-cv.onpointerdown=e=>{if(!(src||vo)||gen)return;cv.setPointerCapture(e.pointerId);if(drawing)return;if(e.pointerType=='touch'&&S.po)return;
- if(S.tool!='obj'){if(!rec)bar.classList.add('h');sh.classList.add('h')}
- if(S.tool=='obj'){objDown(e);return}
- if(S.tool=='touch'){drawing={id:e.pointerId,touch:1};return}
- if(S.tool=='laser'){drawing={id:e.pointerId,laser:1};laser={...pt(e),t:0};dirty=1;return}
- const K=ik();if(!inkC[K])inkC[K]=mk(OW,OH);drawing={id:e.pointerId,K};live={tool:S.tool,color:S.color,w:S.w,pts:[pt(e)]};dirty=1};
-cv.onpointermove=e=>{if(!drawing||e.pointerId!=drawing.id||drawing.touch)return;if(drawing.obj){objMove(e);return}if(drawing.laser){laser={...pt(e),t:0};dirty=1;return}
- const c=inkC[drawing.K].getContext('2d');for(const ev of(e.getCoalescedEvents?.()||[e])){const q=pt(ev),a=live.pts[live.pts.length-1];live.pts.push(q);
-  if(live.tool=='pen'||live.tool=='eraser'){c.save();sty(c,live);c.beginPath();c.moveTo(a.x,a.y);c.lineTo(q.x,q.y);c.stroke();c.restore()}}dirty=1};
-cv.onpointerup=cv.onpointercancel=e=>{if(!drawing||e.pointerId!=drawing.id)return;if(drawing.touch){drawing=null;return}if(drawing.obj){drawing=null;scheduleSave();return}if(drawing.laser){laser.t=performance.now();drawing=null;dirty=1;return}
- const it=live,K=drawing.K;if(it.tool!='pen'&&it.tool!='eraser')paint(inkC[K].getContext('2d'),it);(ink[K]=ink[K]||[]).push(it);rdo[K]=[];live=null;drawing=null;dirty=1;scheduleSave()};
-// touch indicators (shown in the recorded video, never drawn as ink)
-const tp=new Map(),taps=[];
-const tpt=e=>{const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*OW/r.width,y:(e.clientY-r.top)*OH/r.height}};
-cv.addEventListener('pointerdown',e=>{const p=tpt(e);tp.set(e.pointerId,{...p,tr:[{...p,t:performance.now()}]});taps.push({...p,t:performance.now()});dirty=1},true);
-cv.addEventListener('pointermove',e=>{const o=tp.get(e.pointerId);if(!o)return;const p=tpt(e),n=performance.now();o.x=p.x;o.y=p.y;o.tr.push({...p,t:n});while(o.tr.length&&n-o.tr[0].t>450)o.tr.shift();dirty=1},true);
-const tup=e=>{if(tp.delete(e.pointerId))dirty=1};cv.addEventListener('pointerup',tup,true);cv.addEventListener('pointercancel',tup,true);
-function paintTouches(g){if(!(S.touch||S.tool=='touch')){tp.size&&tp.clear();taps.length=0;return}if(!tp.size&&!taps.length)return;const n=performance.now(),r0=OW/38;
- for(const o of tp.values()){if(o.tr.length>1){g.save();g.lineCap='round';for(let i=1;i<o.tr.length;i++){const a=o.tr[i-1],b=o.tr[i],al=Math.max(0,1-(n-b.t)/450);g.strokeStyle=`rgba(255,255,255,${.4*al})`;g.lineWidth=r0*.9*al+1;g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.stroke()}g.restore()}
-  g.save();g.beginPath();g.arc(o.x,o.y,r0,0,7);g.fillStyle='rgba(255,255,255,.35)';g.fill();g.lineWidth=r0*.14;g.strokeStyle='rgba(53,224,194,.95)';g.stroke();g.restore()}
- for(let i=taps.length-1;i>=0;i--){const a=taps[i],age=(n-a.t)/600;if(age>=1){taps.splice(i,1);continue}g.save();g.beginPath();g.arc(a.x,a.y,r0*(1+age*1.6),0,7);g.lineWidth=r0*.14;g.strokeStyle=`rgba(53,224,194,${.9*(1-age)})`;g.stroke();g.restore()}
- dirty=1}
-cv.oncontextmenu=e=>e.preventDefault();
-// ---------- drawing
-function paintSlide(g,i,alpha,withInk){g.save();g.globalAlpha=alpha;const e=cache.get(i);
- if(e&&e.ready&&!e.failed){const c=e.c,s=Math.min(OW/c.width,OH/c.height),w=c.width*s,h=c.height*s;g.fillStyle='#fff';g.fillRect(0,0,OW,OH);g.drawImage(c,(OW-w)/2,(OH-h)/2,w,h)}
- else{g.fillStyle='#fff';g.fillRect(0,0,OW,OH);g.fillStyle='#8a93a8';g.font=`${OW/30}px Vazirmatn,Tahoma,sans-serif`;g.textAlign='center';g.fillText(e&&e.failed?'نمایش این اسلاید ممکن نشد':'در حال آماده‌سازی…',OW/2,OH/2)}
- drawOvl(g,i);
- if(withInk!==false){const k=inkCv(i);if(k)g.drawImage(k,0,0)}g.restore()}
-function draw(){dirty=0;
- if(gen){gen.paint(cx)}else{if(vo){cx.drawImage(vo.v,0,0,OW,OH);const k=inkCv('vo');k&&cx.drawImage(k,0,0)}else paintSlide(cx,cur,1);if(live&&live.tool!='pen'&&live.tool!='eraser')paint(cx,live);
-  if(laser){const age=laser.t?(performance.now()-laser.t)/700:0;if(age<1){cx.save();cx.globalAlpha=1-age;const r=OW/60;const gr=cx.createRadialGradient(laser.x,laser.y,0,laser.x,laser.y,r*2.2);gr.addColorStop(0,'#ff2a2a');gr.addColorStop(.35,'#ff2a2acc');gr.addColorStop(1,'#ff2a2a00');cx.fillStyle=gr;cx.beginPath();cx.arc(laser.x,laser.y,r*2.2,0,7);cx.fill();cx.restore();if(laser.t)dirty=1}else laser=null}}
- if(!gen)paintTouches(cx);
- if(cam.on&&vid.videoWidth){const r=OW*.075,x=OW-r-OW*.015,y=r+OW*.015,m=Math.min(vid.videoWidth,vid.videoHeight);cx.save();cx.beginPath();cx.arc(x,y,r,0,7);cx.clip();cx.drawImage(vid,(vid.videoWidth-m)/2,(vid.videoHeight-m)/2,m,m,x-r,y-r,2*r,2*r);cx.restore();cx.lineWidth=OW*.004;cx.strokeStyle='#35e0c2';cx.beginPath();cx.arc(x,y,r,0,7);cx.stroke()}}
-(function loop(){(dirty||rec||gen||cam.on||vo)&&(src||vo)&&draw();requestAnimationFrame(loop)})();
-$('#cm').onchange=async e=>{if(e.target.checked){try{cam.st=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:320,height:320}});vid.srcObject=cam.st;vid.muted=true;vid.playsInline=true;await vid.play();cam.on=1}catch{e.target.checked=false;toast('دسترسی به دوربین ممکن نشد')}}else{cam.st?.getTracks().forEach(t=>t.stop());cam.on=0;dirty=1}};
-// ---------- recording with voice (canvas = slide + ink, mic cleaned)
-const MTS=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
-const pickMt=()=>MTS.find(t=>MediaRecorder.isTypeSupported(t));
-let chunks=[],aud,tmr,t0,acc=0;
-$('#rb').onclick=async()=>{if(gen)return;if(!src&&!vo)return;if(rec){rec.stop();return}
- let st;try{st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1,sampleRate:48000}})}catch{toast('دسترسی به میکروفون لازم است');return}
- const ac=new AudioContext({sampleRate:48000}),s=ac.createMediaStreamSource(st),hp=ac.createBiquadFilter(),ds=ac.createBiquadFilter(),ar=ac.createBiquadFilter(),c1=ac.createDynamicsCompressor(),g=ac.createGain(),c2=ac.createDynamicsCompressor(),dst=ac.createMediaStreamDestination();
- hp.type='highpass';hp.frequency.value=90;ds.type='peaking';ds.frequency.value=6500;ds.Q.value=1.2;ds.gain.value=-3;ar.type='highshelf';ar.frequency.value=9000;ar.gain.value=-2;
- Object.entries({threshold:-32,knee:24,ratio:8,attack:.005,release:.25}).forEach(([a,v])=>c1[a].value=v);g.gain.value=1.7;Object.entries({threshold:-6,knee:0,ratio:20,attack:.001,release:.1}).forEach(([a,v])=>c2[a].value=v);
- s.connect(hp);hp.connect(ds);ds.connect(ar);ar.connect(c1);c1.connect(g);g.connect(c2);c2.connect(dst);aud={st,ac};
- let ms0=null;if(vo&&vo.music){try{const buf=await ac.decodeAudioData(await vo.music.arrayBuffer()),mg=ac.createGain();mg.gain.value=0;ms0=ac.createBufferSource();ms0.buffer=buf;ms0.loop=true;ms0.connect(mg);mg.connect(dst);vo.mg=mg}catch{toast('آهنگ خوانده نشد؛ بدون آهنگ ضبط می‌شود');ms0=null}}
- bar.classList.add('h');sh.classList.add('h');const cd=$('#cd');for(let n=3;n>0;n--){cd.textContent=n;cd.style.display='flex';await new Promise(r=>setTimeout(r,800))}cd.style.display='none';
- const mt=pickMt(),vs=cv.captureStream(30);vs.addTrack(dst.stream.getAudioTracks()[0]);chunks=[];
- rec=new MediaRecorder(vs,{mimeType:mt,videoBitsPerSecond:S.q>1300?4000000:2500000,audioBitsPerSecond:96000});rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
- rec.onstop=()=>{const ext=mt.includes('mp4')?'mp4':'webm';lastClip={blob:new Blob(chunks,{type:mt.split(';')[0]})};dlBlob(lastClip.blob,'slides-'+Date.now()+'.'+ext);
-  aud.st.getTracks().forEach(t=>t.stop());aud.ac.close();clearInterval(tmr);rec=null;if(vo)endVo();$('#rb').textContent='●';$('#ps').style.display=$('#tm').style.display='none';toast('ذخیره شد ('+ext.toUpperCase()+') — برای آهنگ: ☰ ← 🎵')};
- rec.start(1000);t0=Date.now();acc=0;
- if(vo){const v=vo.v;if(vo.auto){if(v.ended||v.currentTime>=vo.dur-.05)v.currentTime=0;v.play().catch(()=>{})}if(ms0){const n=ac.currentTime;vo.mg.gain.setValueAtTime(0,n);vo.mg.gain.linearRampToValueAtTime(vo.vol,n+1);const rem=vo.dur-v.currentTime;if(vo.fade&&vo.auto&&isFinite(rem)&&rem>6){vo.mg.gain.setValueAtTime(vo.vol,n+rem-3);vo.mg.gain.linearRampToValueAtTime(0,n+rem)}ms0.start()}}
- $('#rb').textContent='■';$('#ps').style.display=$('#tm').style.display='block';$('#ps').textContent='⏸';
- tmr=setInterval(()=>{if(rec.state=='recording')$('#tm').textContent=mmss(acc+(Date.now()-t0)/1000)},500);navigator.wakeLock?.request('screen').catch(()=>{})};
-$('#ps').onclick=()=>{if(!rec)return;if(rec.state=='recording'){rec.pause();vo&&vo.v.pause();acc+=(Date.now()-t0)/1000;$('#ps').textContent='▶'}else{rec.resume();if(vo&&vo.auto)vo.v.play().catch(()=>{});t0=Date.now();$('#ps').textContent='⏸'}};
-// ---------- automatic clip from slides (silent, or with background music)
-function genDlg(){if(!src)return;if(rec){toast('اول ضبط را تمام کن');return}sh.classList.add('h');bar.classList.add('h');
- const o=document.createElement('div');o.className='ov';const d0=+(localStorage.sl_d||5);
- o.innerHTML=`<div class="pn"><b>🎞 ساخت کلیپ خودکار از اسلایدها</b>
- <label>زمان نمایش هر اسلاید: <input type="number" id="gd" min="1" max="300" value="${d0}"> ثانیه</label>
- <label>گذر بین اسلایدها: <select id="gt"><option value="0.6">محو شدن آرام</option><option value="0">بدون گذر</option></select></label>
- <label><input type="checkbox" id="gi" checked> نوشته‌ها و خط‌های خودم هم در کلیپ باشد</label>
- <label><input type="checkbox" id="gh"> اسلایدهای مخفی هم باشد</label>
- <details><summary>زمان جداگانه برای هر اسلاید (اختیاری)</summary><div id="gl" style="margin-top:8px"></div></details>
- <label class="b">🎵 آهنگ پس‌زمینه (اختیاری) <input type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac" hidden id="gm"></label><div id="gmn" style="font-size:12px;opacity:.8"></div>
- <label>بلندی آهنگ: <input type="range" id="gv" min="5" max="100" value="40" style="accent-color:var(--ac);width:100%"></label>
- <div id="ge" style="font-size:13px"></div><div id="gs" style="font-size:13px;min-height:22px"></div>
- <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="on" id="go">▶ شروع ساخت</button><button id="gx">بستن</button></div></div>`;
- document.body.appendChild(o);const q=s=>o.querySelector(s);let music=null,per={};
- const list=()=>{const h=q('#gh').checked,a=[];for(let i=0;i<src.n;i++)if(h||!src.hidden[i])a.push(i);return a},dur=i=>per[i]||+q('#gd').value||5;
- function grid(){q('#gl').innerHTML='<div id="gl2" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px">'+list().map(i=>`<label style="display:flex;gap:4px;align-items:center;font-size:12px">${fa(i+1)}:<input type="number" data-i="${i}" min="1" max="300" placeholder="${q('#gd').value}" value="${per[i]||''}" style="width:50px"></label>`).join('')+'</div>';
-  q('#gl').querySelectorAll('input').forEach(x=>x.oninput=()=>{const v=+x.value;if(v>0)per[+x.dataset.i]=v;else delete per[+x.dataset.i];est()})}
- function est(){const l=list(),tot=l.reduce((a,i)=>a+dur(i),0);q('#ge').textContent=`${fa(l.length)} اسلاید — طول کلیپ حدود ${fa(mmss(tot))} (ساخت آن هم تقریباً همین‌قدر طول می‌کشد)`}
- q('#gd').oninput=()=>{est();q('#gl').querySelectorAll('input').forEach(x=>x.placeholder=q('#gd').value)};q('#gh').onchange=()=>{grid();est()};grid();est();
- q('#gm').onchange=e=>{music=e.target.files[0]||null;q('#gmn').textContent=music?'🎵 '+music.name:''};
- let run=null;q('#gx').onclick=()=>{if(run)run.cancel();o.remove()};
- q('#go').onclick=async()=>{if(run)return;const l=list();if(!l.length){q('#gs').textContent='اسلایدی برای ساخت نیست';return}try{localStorage.sl_d=q('#gd').value}catch{}
-  o.classList.add('run');[...q('.pn').children].forEach(c=>{if(c.id!=='gs'&&c.id!=='ge'&&c.tagName!=='B'&&!c.querySelector?.('#gx')&&c.id!=='gx'&&!(c.lastElementChild&&c.lastElementChild.id==='gx'))c.style.display='none'});q('#ge').style.display='none';q('#go').style.display='none';
-  run=genClip({list:l,durs:l.map(dur),fade:+q('#gt').value,ink:q('#gi').checked,music,vol:q('#gv').value/100,say:t=>q('#gs').textContent=t});
-  try{await run.done;q('#gs').textContent='✅ تمام شد و ذخیره شد';o.classList.remove('run')}catch(err){q('#gs').textContent=err.message||'ناموفق بود';o.classList.remove('run')}run=null;q('#go').style.display='';q('.pn').querySelectorAll('*').forEach(c=>{if(c.style.display==='none'&&c.id!=='ge')c.style.display=''});q('#ge').style.display='';q('#go').textContent='▶ دوباره بساز'}}
-function genClip(o){let cancelled=false;const done=(async()=>{
-  let ac=null,dst=null,buf=null;
-  if(o.music){ac=new AudioContext();await ac.resume().catch(()=>{});try{buf=await ac.decodeAudioData(await o.music.arrayBuffer())}catch{ac.close();throw new Error('این فایل آهنگ خوانده نشد؛ mp3 یا m4a امتحان کن')}dst=ac.createMediaStreamDestination()}
-  const st=cv.captureStream(30);if(dst)st.addTrack(dst.stream.getAudioTracks()[0]);
-  const mt=pickMt(),chunks=[],r=new MediaRecorder(st,dst?{mimeType:mt,videoBitsPerSecond:S.q>1300?4000000:2500000,audioBitsPerSecond:128000}:{mimeType:mt.replace(/,mp4a[^;]*/,'').replace(/,opus/,''),videoBitsPerSecond:S.q>1300?4000000:2500000});
-  r.ondataavailable=e=>e.data.size&&chunks.push(e.data);const stopped=new Promise(res=>r.onstop=res);
-  const saveCur=cur;let g0=null,mg=null,ms=null;
-  gen={a:-1,b:-1,alpha:1,ink:o.ink,paint(g){if(this.alpha<1&&this.a>=0){paintSlide(g,this.a,1,this.ink);paintSlide(g,this.b,this.alpha,this.ink)}else paintSlide(g,this.b,1,this.ink)}};
-  navigator.wakeLock?.request('screen').catch(()=>{});
-  const first=getSlide(o.list[0]);await first.p;gen.b=o.list[0];draw();
-  r.start(1000);
-  if(ac){ms=ac.createBufferSource();ms.buffer=buf;ms.loop=true;mg=ac.createGain();ms.connect(mg);mg.connect(dst);const n=ac.currentTime;mg.gain.setValueAtTime(0,n);mg.gain.linearRampToValueAtTime(o.vol,n+1);ms.start()}
-  for(let k=0;k<o.list.length&&!cancelled;k++){const i=o.list[k],e=getSlide(i);await e.p;gen.a=gen.b;gen.b=i;cur=i;
-   const nx=o.list[k+1];if(nx!=null)getSlide(nx);
-   const t0=performance.now(),d=o.durs[k];
-   if(mg&&k===o.list.length-1){const n=ac.currentTime,fd=Math.min(3,d);mg.gain.setValueAtTime(o.vol,n+d-fd);mg.gain.linearRampToValueAtTime(0,n+d)}
-   while(!cancelled){const t=(performance.now()-t0)/1000;if(t>=d)break;gen.alpha=(k>0&&o.fade>0)?Math.min(1,t/o.fade):1;if(k>0&&gen.alpha<1&&gen.a<0)gen.alpha=1;draw();o.say(`در حال ساخت… اسلاید ${fa(k+1)} از ${fa(o.list.length)} (${fa(i+1)})`+' — صفحه را باز نگه دار');await raf()}}
-  gen.alpha=1;draw();await raf();await raf();
-  r.stop();await stopped;try{ms&&ms.stop()}catch{}ac&&ac.close();gen=null;cur=saveCur;ui();dirty=1;
-  if(cancelled)throw new Error('لغو شد');
-  const ext=mt.includes('mp4')?'mp4':'webm';lastClip={blob:new Blob(chunks,{type:mt.split(';')[0]})};dlBlob(lastClip.blob,'slides-clip-'+Date.now()+'.'+ext)})();
- return{done,cancel(){cancelled=true}}}
-// ---------- background music over a finished clip (re-record clip + music in real time)
-function mixMusic(clip,mus,vol,fade,say){let cancelled=false,stop=null;
- const done=(async()=>{const ac=new AudioContext();await ac.resume().catch(()=>{});let buf;
-  try{buf=await ac.decodeAudioData(await mus.arrayBuffer())}catch{ac.close();throw new Error('این فایل آهنگ خوانده نشد؛ mp3 یا m4a امتحان کن')}
-  const v=document.createElement('video');v.playsInline=true;v.preload='auto';v.src=URL.createObjectURL(clip);
-  await new Promise((r,j)=>{v.onloadedmetadata=r;v.onerror=()=>j(new Error('این کلیپ باز نشد'))});
-  if(!isFinite(v.duration)){v.currentTime=1e7;await new Promise(r=>v.addEventListener('seeked',r,{once:true}))}
-  const dur=v.duration;if(v.currentTime!=0){v.currentTime=0;await new Promise(r=>v.addEventListener('seeked',r,{once:true}))}
-  const sc=Math.min(1,1280/v.videoWidth),w=Math.round(v.videoWidth*sc/2)*2,h=Math.round(v.videoHeight*sc/2)*2,c=mk(w,h),x=c.getContext('2d');
-  const dst=ac.createMediaStreamDestination(),vs=ac.createMediaElementSource(v);vs.connect(dst);
-  const ms=ac.createBufferSource();ms.buffer=buf;ms.loop=true;const mg=ac.createGain();mg.gain.value=0;ms.connect(mg);mg.connect(dst);
-  const st=c.captureStream(30);st.addTrack(dst.stream.getAudioTracks()[0]);const mt=pickMt(),chunks=[];
-  const r=new MediaRecorder(st,{mimeType:mt,videoBitsPerSecond:2500000,audioBitsPerSecond:128000});r.ondataavailable=e=>e.data.size&&chunks.push(e.data);
-  const stopped=new Promise(res=>r.onstop=res);let rf;
-  const frame=()=>{x.drawImage(v,0,0,w,h);const t=v.currentTime;say('در حال ساخت… '+mmss(t)+(isFinite(dur)?' / '+mmss(dur)+' ('+fa(Math.round(100*t/dur))+'٪) — صفحه را باز نگه دار':''));rf=requestAnimationFrame(frame)};
-  navigator.wakeLock?.request('screen').catch(()=>{});
-  r.start(1000);await v.play();ms.start();const n=ac.currentTime;mg.gain.setValueAtTime(0,n);mg.gain.linearRampToValueAtTime(vol,n+1);
-  if(fade&&isFinite(dur)&&dur>6){mg.gain.setValueAtTime(vol,n+dur-3);mg.gain.linearRampToValueAtTime(0,n+dur)}
-  frame();await new Promise(res=>{v.onended=res;stop=()=>{v.pause();res()}});
-  cancelAnimationFrame(rf);r.stop();await stopped;try{ms.stop()}catch{}ac.close();URL.revokeObjectURL(v.src);
-  if(cancelled)throw new Error('لغو شد');
-  dlBlob(new Blob(chunks,{type:mt.split(';')[0]}),'clip-music-'+Date.now()+'.'+(mt.includes('mp4')?'mp4':'webm'))})();
- return{done,cancel(){cancelled=true;stop&&stop()}}}
-function musicDlg(){if(rec||gen){toast('اول ضبط را تمام کن');return}sh.classList.add('h');bar.classList.add('h');
- const o=document.createElement('div');o.className='ov';
- o.innerHTML=`<div class="pn"><b>🎵 آهنگ پس‌زمینه برای یک کلیپ آماده</b>
- <label class="b" style="display:block">🎬 <span id="mc">${lastClip?'آخرین کلیپ (برای تغییر بزن)':'انتخاب کلیپ'}</span><input type="file" accept="video/*" hidden id="mcf"></label>
- <label class="b" style="display:block">🎵 <span id="mm">انتخاب آهنگ</span><input type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac" hidden id="mmf"></label>
- <label>بلندی آهنگ: <input type="range" id="mvv" min="5" max="100" value="22" style="accent-color:var(--ac);width:100%"></label>
- <label><input type="checkbox" id="mfd" checked> در ثانیه‌های آخر آرام کم شود</label><div id="mst" style="min-height:22px;font-size:13px"></div>
- <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="on" id="mgo">▶ شروع</button><button id="mx">بستن</button></div></div>`;
- let clip=lastClip?lastClip.blob:null,mus=null,busy=null;const q=s=>o.querySelector(s);
- q('#mcf').onchange=e=>{const f=e.target.files[0];if(f){clip=f;q('#mc').textContent=f.name}};q('#mmf').onchange=e=>{const f=e.target.files[0];if(f){mus=f;q('#mm').textContent=f.name}};
- q('#mx').onclick=()=>{if(busy)busy.cancel();o.remove()};
- q('#mgo').onclick=async()=>{if(busy)return;if(!clip||!mus){q('#mst').textContent='اول کلیپ و آهنگ را انتخاب کن';return}q('#mgo').disabled=true;q('#mst').textContent='در حال آماده‌سازی…';
-  busy=mixMusic(clip,mus,q('#mvv').value/100,q('#mfd').checked,t=>q('#mst').textContent=t);try{await busy.done;q('#mst').textContent='✅ تمام شد و ذخیره شد'}catch(err){q('#mst').textContent=err.message||'ناموفق بود'}busy=null;q('#mgo').disabled=false};
- document.body.appendChild(o)}
-// ---------- voice (+ music) over a finished clip
-function endVo(){if(!vo)return;try{vo.v.pause()}catch{}URL.revokeObjectURL(vo.url);delete ink.vo;delete inkC.vo;delete rdo.vo;vo=null;$('#vp').style.display=$('#vx').style.display='none';
- if(src){setupSize();go(cur)}else{$('#home').style.display='flex';$('#side').style.display='none';bar.classList.add('h')}ui();dirty=1}
-async function voOpen(clip,o){busyMsg('در حال باز کردن کلیپ…');const v=document.createElement('video');v.playsInline=true;v.muted=true;v.preload='auto';const url=URL.createObjectURL(clip);v.src=url;
- try{await new Promise((r,j)=>{v.onloadedmetadata=r;v.onerror=()=>j(new Error('x'))});
-  if(!isFinite(v.duration)){v.currentTime=1e7;await new Promise(r=>v.addEventListener('seeked',r,{once:true}))}
-  const dur=v.duration;v.currentTime=.01;await new Promise(r=>v.addEventListener('seeked',r,{once:true}));
-  const sc=Math.min(1,S.q/v.videoWidth);OW=Math.round(v.videoWidth*sc/2)*2;OH=Math.round(v.videoHeight*sc/2)*2;cv.width=OW;cv.height=OH;inkC={};
-  vo={v,url,dur,music:o.music,vol:o.vol,fade:o.fade,auto:o.auto,stopAuto:o.stopAuto};
-  v.addEventListener('timeupdate',ui);v.addEventListener('play',()=>{$('#vp').textContent='⏸';dirty=1});v.addEventListener('pause',()=>{$('#vp').textContent='▶';dirty=1});
-  v.onended=()=>{ui();if(rec&&vo&&vo.stopAuto)setTimeout(()=>rec&&rec.stop(),500)};
-  $('#home').style.display='none';$('#side').style.display='flex';$('#vp').style.display=$('#vx').style.display='';$('#vp').textContent='▶';fit();bar.classList.remove('h');ui();dirty=1;busyMsg();toast('کلیپ آماده است؛ دکمه‌ی ● را بزن و صحبت کن')}
- catch(e){busyMsg();URL.revokeObjectURL(url);toast('این کلیپ در مرورگر باز نشد')}}
-function voDlg(){if(rec||gen){toast('اول ضبط را تمام کن');return}sh.classList.add('h');bar.classList.add('h');
- const o=document.createElement('div');o.className='ov';
- o.innerHTML=`<div class="pn"><b>🎙 صدا (و آهنگ) روی یک کلیپ آماده</b>
- <label class="b" style="display:block">🎬 <span id="vc">${lastClip?'آخرین کلیپ ساخته‌شده (برای تغییر بزن)':'انتخاب کلیپ'}</span><input type="file" accept="video/*" hidden id="vcf"></label>
- <label class="b" style="display:block">🎵 <span id="vm">آهنگ پس‌زمینه (اختیاری)</span><input type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac" hidden id="vmf"></label>
- <label>بلندی آهنگ: <input type="range" id="vv" min="5" max="100" value="18" style="accent-color:var(--ac);width:100%"></label>
- <label><input type="checkbox" id="vf" checked> در ثانیه‌های آخر آهنگ آرام کم شود</label>
- <label><input type="checkbox" id="va" checked> با شروع ضبط، کلیپ خودکار پخش شود</label>
- <label><input type="checkbox" id="ve" checked> با تمام شدن کلیپ، ضبط هم تمام شود</label>
- <label><input type="checkbox" id="vt"> لمس‌ها و حرکت انگشت (بدون خط) در ویدیو دیده شود</label>
- <div style="font-size:12px;opacity:.75">بعد از «آماده‌سازی»، کلیپ روی صفحه می‌آید؛ هر وقت خواستی ● را بزن تا کلیپ شروع شود و صدایت (با آهنگ) ضبط شود. صدای اصلی کلیپ حذف می‌شود.</div>
- <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="on" id="vg">آماده‌سازی</button><button id="vq">بستن</button></div></div>`;
- document.body.appendChild(o);const q=s=>o.querySelector(s);let clip=lastClip?lastClip.blob:null,mus=null;q('#vt').checked=!!S.touch;
- q('#vcf').onchange=e=>{const f=e.target.files[0];if(f){clip=f;q('#vc').textContent=f.name}};q('#vmf').onchange=e=>{const f=e.target.files[0];if(f){mus=f;q('#vm').textContent=f.name}};
- q('#vq').onclick=()=>o.remove();
- q('#vg').onclick=async()=>{if(!clip){toast('اول کلیپ را انتخاب کن');return}S.touch=q('#vt').checked?1:0;saveS();const opt={music:mus,vol:q('#vv').value/100,fade:q('#vf').checked,auto:q('#va').checked,stopAuto:q('#ve').checked};o.remove();if(vo)endVo();await voOpen(clip,opt)}}
-// ---------- export every page/slide as a picture slide in a .pptx
-async function exportPptx(){if(!src)return;if(src.kind==='gen')return exportGenPptx();sh.classList.add('h');bar.classList.add('h');
- const W0=12192000,r=src.ratio,sw=r<=1?W0:Math.round(W0/r),shh=r<=1?Math.round(W0*r):W0,rw=r>1?1200:1600;
- const A='http://schemas.openxmlformats.org/drawingml/2006/main',R='http://schemas.openxmlformats.org/officeDocument/2006/relationships',P='http://schemas.openxmlformats.org/presentationml/2006/main',H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
- const rel=(items)=>H+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+items.map(([id,t,tg])=>`<Relationship Id="${id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/${t}" Target="${tg}"/>`).join('')+'</Relationships>';
- const ns=`xmlns:a="${A}" xmlns:r="${R}" xmlns:p="${P}"`,n=src.n,z=new JSZip();
- const grp='<p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>';
- z.file('[Content_Types].xml',H+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="jpeg" ContentType="image/jpeg"/><Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/><Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/><Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/><Override PartName="/ppt/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>'+Array.from({length:n},(_,i)=>`<Override PartName="/ppt/slides/slide${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>`).join('')+'</Types>');
- z.file('_rels/.rels',rel([['rId1','officeDocument','ppt/presentation.xml']]));
- z.file('ppt/presentation.xml',H+`<p:presentation ${ns}><p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst><p:sldIdLst>${Array.from({length:n},(_,i)=>`<p:sldId id="${256+i}" r:id="rId${i+2}"/>`).join('')}</p:sldIdLst><p:sldSz cx="${sw}" cy="${shh}"/><p:notesSz cx="6858000" cy="9144000"/></p:presentation>`);
- z.file('ppt/_rels/presentation.xml.rels',rel([['rId1','slideMaster','slideMasters/slideMaster1.xml'],...Array.from({length:n},(_,i)=>[`rId${i+2}`,'slide',`slides/slide${i+1}.xml`])]));
- z.file('ppt/slideMasters/slideMaster1.xml',H+`<p:sldMaster ${ns}><p:cSld><p:bg><p:bgRef idx="1001"><a:schemeClr val="bg1"/></p:bgRef></p:bg><p:spTree>${grp}</p:spTree></p:cSld><p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/><p:sldLayoutIdLst><p:sldLayoutId id="2147483649" r:id="rId1"/></p:sldLayoutIdLst><p:txStyles><p:titleStyle/><p:bodyStyle/><p:otherStyle/></p:txStyles></p:sldMaster>`);
- z.file('ppt/slideMasters/_rels/slideMaster1.xml.rels',rel([['rId1','slideLayout','../slideLayouts/slideLayout1.xml'],['rId2','theme','../theme/theme1.xml']]));
- z.file('ppt/slideLayouts/slideLayout1.xml',H+`<p:sldLayout ${ns} type="blank" preserve="1"><p:cSld name="Blank"><p:spTree>${grp}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>`);
- z.file('ppt/slideLayouts/_rels/slideLayout1.xml.rels',rel([['rId1','slideMaster','../slideMasters/slideMaster1.xml']]));
- const sf='<a:solidFill><a:schemeClr val="phClr"/></a:solidFill>',lnS='<a:ln w="6350">'+sf+'</a:ln>';
- z.file('ppt/theme/theme1.xml',H+`<a:theme xmlns:a="${A}" name="Office"><a:themeElements><a:clrScheme name="Office"><a:dk1><a:sysClr val="windowText" lastClr="000000"/></a:dk1><a:lt1><a:sysClr val="window" lastClr="FFFFFF"/></a:lt1><a:dk2><a:srgbClr val="44546A"/></a:dk2><a:lt2><a:srgbClr val="E7E6E6"/></a:lt2><a:accent1><a:srgbClr val="4472C4"/></a:accent1><a:accent2><a:srgbClr val="ED7D31"/></a:accent2><a:accent3><a:srgbClr val="A5A5A5"/></a:accent3><a:accent4><a:srgbClr val="FFC000"/></a:accent4><a:accent5><a:srgbClr val="5B9BD5"/></a:accent5><a:accent6><a:srgbClr val="70AD47"/></a:accent6><a:hlink><a:srgbClr val="0563C1"/></a:hlink><a:folHlink><a:srgbClr val="954F72"/></a:folHlink></a:clrScheme><a:fontScheme name="Office"><a:majorFont><a:latin typeface="Calibri"/><a:ea typeface=""/><a:cs typeface=""/></a:majorFont><a:minorFont><a:latin typeface="Calibri"/><a:ea typeface=""/><a:cs typeface=""/></a:minorFont></a:fontScheme><a:fmtScheme name="Office"><a:fillStyleLst>${sf}${sf}${sf}</a:fillStyleLst><a:lnStyleLst>${lnS}${lnS}${lnS}</a:lnStyleLst><a:effectStyleLst>${'<a:effectStyle><a:effectLst/></a:effectStyle>'.repeat(3)}</a:effectStyleLst><a:bgFillStyleLst>${sf}${sf}${sf}</a:bgFillStyleLst></a:fmtScheme></a:themeElements></a:theme>`);
- const c=mk(2,2);
- for(let i=0;i<n;i++){busyMsg(`در حال ساخت پاورپوینت… صفحه ${fa(i+1)} از ${fa(n)}`);await new Promise(r=>setTimeout(r,0));
-  await src.render(i,c,rw);const blob=await new Promise(res=>c.toBlob(res,'image/jpeg',.88));
-  // fit picture inside the slide keeping its own aspect
-  const ar=c.height/c.width;let pw=sw,ph=Math.round(sw*ar);if(ph>shh){ph=shh;pw=Math.round(shh/ar)}const ox=Math.round((sw-pw)/2),oy=Math.round((shh-ph)/2);
-  z.file(`ppt/media/image${i+1}.jpeg`,blob);
-  z.file(`ppt/slides/slide${i+1}.xml`,H+`<p:sld ${ns}><p:cSld><p:spTree>${grp}<p:pic><p:nvPicPr><p:cNvPr id="2" name="Picture ${i+1}"/><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="rId2"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="${ox}" y="${oy}"/><a:ext cx="${pw}" cy="${ph}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic></p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`);
-  z.file(`ppt/slides/_rels/slide${i+1}.xml.rels`,rel([['rId1','slideLayout','../slideLayouts/slideLayout1.xml'],['rId2','image',`../media/image${i+1}.jpeg`]]))}
- busyMsg('در حال بسته‌بندی فایل…');const out=await z.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.presentationml.presentation',compression:'DEFLATE'});
- busyMsg();dlBlob(out,(src.name||'slides').replace(/\.[^.]+$/,'')+'.pptx');toast('پاورپوینت ساخته شد (هر صفحه یک اسلاید تصویری)')}
-// ---------- autosave (file + ink) to IndexedDB
-let cdb=null,svT=0;
-const cidb=()=>new Promise((res,rej)=>{const r=indexedDB.open('slidemaker',1);r.onupgradeneeded=()=>r.result.createObjectStore('k',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
-const cput=(id,v)=>{if(!cdb)return;try{const t=cdb.transaction('k','readwrite');t.objectStore('k').put({...v,id});t.onerror=()=>{}}catch{}};
-const cget=id=>new Promise(res=>{if(!cdb)return res(null);try{const q=cdb.transaction('k').objectStore('k').get(id);q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null)}catch{res(null)}});
-const saveNow=()=>{if(!src||src.kind==='gen')return;const o={};for(const k in ink)if(k!=='vo'&&ink[k].length)o[k]=ink[k].map(({tool,color,w,pts})=>({tool,color,w,pts:pts.map(p=>({x:+p.x.toFixed(1),y:+p.y.toFixed(1)}))}));cput('ink',{cur,ink:o,ow:OW});saveOvl()};
-const scheduleSave=()=>{clearTimeout(svT);svT=setTimeout(saveNow,1500)};
-document.addEventListener('visibilitychange',()=>{if(document.hidden)saveNow()});addEventListener('pagehide',saveNow);
-if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-(async()=>{try{cdb=await cidb()}catch{cdb=null}ui();
- const d=await cget('deck');if(d&&d.blob){const c=await ask(`کار قبلی پیدا شد: «${(d.name||'').replace(/[<>&]/g,'')}». ادامه بدهیم؟`,['▶ ادامه‌ی کار قبلی','🆕 شروع تازه']);
-  if(c==0){const f=new File([d.blob],d.name||'file.pdf',{type:d.blob.type});await openFile(f,true);const k=await cget('ink');if(k&&src){const sc=OW/(k.ow||OW);for(const i in k.ink){ink[i]=k.ink[i].map(s=>({...s,pts:s.pts.map(p=>({x:p.x*sc,y:p.y*sc}))}))}inkC={};cur=Math.min(k.cur||0,src.n-1);await loadOvl();go(cur)}}}})();
-</script><script src="lib/extra.js"></script></body></html>
+const $=id=>document.getElementById(id);
+const FONTS=['Vazirmatn','B Nazanin','Noto Naskh Arabic','Tahoma','Georgia','Arial','Courier New'];
+const P={light:{bg:'#f6efe2',card:'#fffaf0',ink:'#4a3222',acc:'#8b5a2b',line:'#dccfb8'},dark:{bg:'#241a14',card:'#32251c',ink:'#f1e6d3',acc:'#c89560',line:'#5a4636'}};
+const C=['#8b5a2b','#c89560','#a0522d','#d2b48c','#6b4226','#deb887'];
+const Q={l:{w:854,h:480,b:700000,fps:15},m:{w:1280,h:720,b:1800000,fps:20},h:{w:1920,h:1080,b:3800000,fps:24}};
+const mk=(t,b)=>({im:[],t:t||'',b:b||'',k:'text',f:'Vazirmatn',s:34,d:'',c:'bar'});
+let D,i=0,dirty=true,Rc=null,ch=[],tmr,last=null,dp;
+let th=(()=>{try{return localStorage.getItem('th')}catch(e){}})()||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+try{D=JSON.parse(localStorage.getItem('deck1'))}catch(e){}
+if(!Array.isArray(D)||!D.length)D=[mk('عنوان ارائه','متن اسلاید را اینجا بنویس')];
+const cv=$('cv'),X=cv.getContext('2d'),cur=()=>D[i];
+const R=s=>/[\u0600-\u06FF]/.test(s);
+let XL=80,XW=1120;const IMG=new WeakMap();
+function gi(it){let e=IMG.get(it);if(!e){e=new Image();e.onload=()=>{dirty=true};e.src=it.u;IMG.set(it,e)}return e}
+function imgs(Z,rtl,y0){
+ const a=Z.im||[];if(!a.length)return;
+ const bx=rtl?80:740,bw=460,gap=14,bh=(680-y0-gap*(a.length-1))/a.length;
+ a.forEach((it,j)=>{const e=gi(it);if(!e.complete||!e.naturalWidth)return;
+  const sc=Math.min(bw/e.naturalWidth,bh/e.naturalHeight),w=e.naturalWidth*sc,h=e.naturalHeight*sc;
+  X.drawImage(e,bx+(bw-w)/2,y0+j*(bh+gap)+(bh-h)/2,w,h)})}
+async function fit(bl,png){
+ try{const b=await createImageBitmap(bl),m=png?900:1100,s=Math.min(1,m/Math.max(b.width,b.height)),c=document.createElement('canvas');
+  c.width=Math.round(b.width*s);c.height=Math.round(b.height*s);const g=c.getContext('2d');
+  if(!png){g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height)}
+  g.drawImage(b,0,0,c.width,c.height);return c.toDataURL(png?'image/png':'image/jpeg',.8)}catch(e){return null}}
+async function slideImgs(z,k,x){
+ const out=[];
+ try{
+  const rf=z.file(k.replace('slides/','slides/_rels/')+'.rels');if(!rf)return out;
+  const rx=new DOMParser().parseFromString(await rf.async('string'),'application/xml'),mp={};
+  [...rx.getElementsByTagName('Relationship')].forEach(r=>mp[r.getAttribute('Id')]=r.getAttribute('Target'));
+  const ids=[...new Set([...x.getElementsByTagName('a:blip')].map(b=>b.getAttribute('r:embed')).filter(Boolean))];
+  for(const id of ids){
+   if(!mp[id])continue;
+   const path=decodeURIComponent(new URL(mp[id],'http://x/ppt/slides/').pathname.slice(1)),f=z.file(path);if(!f)continue;
+   const u=await fit(await f.async('blob'),/\.png$/i.test(path));if(u)out.push({u})}
+ }catch(e){}
+ return out}
+document.documentElement.dataset.th=th;
+FONTS.forEach(f=>$('f').add(new Option(f,f)));
+['Vazirmatn','B Nazanin','Noto Naskh Arabic'].forEach(f=>['400','bold'].forEach(w=>document.fonts&&document.fonts.load(w+' 30px "'+f+'"').then(()=>{dirty=true}).catch(()=>{})));
+
+function T(str,y,size,col,bold,Z){
+ X.fillStyle=col;X.textBaseline='top';
+ str.split('\n').forEach(par=>{
+  const rtl=R(par);X.direction=rtl?'rtl':'ltr';X.textAlign=rtl?'right':'left';
+  X.font=(bold?'bold ':'')+size+'px '+Z.f+',Tahoma,sans-serif';
+  const px=rtl?XL+XW:XL;let line='';
+  par.split(' ').forEach(w=>{const t=line?line+' '+w:w;if(X.measureText(t).width>XW&&line){X.fillText(line,px,y);y+=size*1.5;line=w}else line=t});
+  X.fillText(line,px,y);y+=size*1.5});
+ return y}
+function tbl(y0,Z,p){
+ const rows=Z.d.split('\n').filter(r=>r.trim()).map(r=>r.split(/[,\t،]/).map(c=>c.trim()));if(!rows.length)return;
+ const n=Math.max(...rows.map(r=>r.length)),cw=1120/n,rh=Math.min(80,(680-y0)/rows.length),fz=Math.min(Z.s,rh*.55),rtl=R(Z.t+Z.b+Z.d);
+ rows.forEach((r,ri)=>{for(let c=0;c<n;c++){
+  const px=rtl?1200-(c+1)*cw:80+c*cw,py=y0+ri*rh,v=r[c]||'';
+  X.fillStyle=ri?(ri%2?p.card:p.bg):p.acc;X.fillRect(px,py,cw,rh);
+  X.strokeStyle=p.line;X.strokeRect(px,py,cw,rh);
+  X.fillStyle=ri?p.ink:p.bg;X.font=(ri?'':'bold ')+fz+'px '+Z.f+',Tahoma,sans-serif';
+  X.textAlign='center';X.textBaseline='middle';X.direction=R(v)?'rtl':'ltr';
+  X.fillText(v,px+cw/2,py+rh/2,cw-12)}});
+ X.textBaseline='top'}
+function chart(y0,Z,p){
+ const rows=Z.d.split('\n').map(r=>r.split(/[,\t،]/)).filter(r=>r.length>1&&!isNaN(parseFloat(r[1])));if(!rows.length)return;
+ const v=rows.map(r=>parseFloat(r[1])),mx=Math.max(...v,1),n=v.length,top=y0+20,bot=620,L=100,Rr=1180,w=(Rr-L)/n,fz=Math.min(Z.s*.7,26);
+ X.textAlign='center';X.textBaseline='top';X.direction='ltr';X.font=fz+'px '+Z.f+',Tahoma,sans-serif';
+ if(Z.c=='pie'){
+  const tot=v.reduce((a,b)=>a+b,0)||1,cx=420,cy=(top+bot+40)/2,r=Math.min(230,(bot-top)/2);let a=-Math.PI/2;
+  v.forEach((q,j)=>{const e=a+q/tot*2*Math.PI;X.fillStyle=C[j%6];X.beginPath();X.moveTo(cx,cy);X.arc(cx,cy,r,a,e);X.fill();a=e;
+   X.fillRect(780,top+j*fz*1.7,fz,fz);X.fillStyle=p.ink;X.textAlign='left';
+   X.fillText(rows[j][0].trim()+' ('+Math.round(q/tot*100)+'%)',780+fz*1.5,top+j*fz*1.7)});
+  return}
+ X.strokeStyle=p.line;X.lineWidth=2;X.beginPath();X.moveTo(L,top);X.lineTo(L,bot);X.lineTo(Rr,bot);X.stroke();
+ const hh=bot-top-40,pts=v.map((q,j)=>[L+w*j+w/2,bot-q/mx*hh]);
+ if(Z.c=='line'){X.strokeStyle=p.acc;X.lineWidth=4;X.beginPath();pts.forEach((q,j)=>j?X.lineTo(q[0],q[1]):X.moveTo(q[0],q[1]));X.stroke()}
+ pts.forEach((q,j)=>{
+  if(Z.c=='line'){X.fillStyle=p.acc;X.beginPath();X.arc(q[0],q[1],7,0,7);X.fill()}
+  else{X.fillStyle=C[j%6];X.fillRect(q[0]-w*.35,q[1],w*.7,bot-q[1])}
+  X.fillStyle=p.ink;X.textAlign='center';X.textBaseline='bottom';X.fillText(v[j],q[0],q[1]-6);
+  X.textBaseline='top';X.fillText(rows[j][0].trim(),q[0],bot+8,w-6)});
+ X.lineWidth=1}
+function draw(){
+ const s=cv.width/1280,p=P[th],Z=cur();
+ X.setTransform(s,0,0,s,0,0);X.fillStyle=p.bg;X.fillRect(0,0,1280,720);
+ if(window.VOD&&VOD()){window.ovl&&ovl();return}
+ if(Z.k=='img'&&window.drawPg){drawPg(Z);window.ovl&&ovl();return}
+ X.fillStyle=p.acc;X.fillRect(0,0,1280,14);
+ XL=80;XW=1120;
+ let y=T(Z.t,50,Math.round(Z.s*1.35),p.acc,true,Z);
+ X.fillStyle=p.line;X.fillRect(80,y,1120,4);y+=26;
+ if(Z.k=='table')tbl(y,Z,p);else if(Z.k=='chart')chart(y,Z,p);
+ else{const hi=Z.im&&Z.im.length,rt=R(Z.t+Z.b);XW=hi?600:1120;XL=hi&&rt?600:80;T(Z.b,y,Z.s,p.ink,false,Z);XL=80;XW=1120;if(hi)imgs(Z,rt,y)}
+ X.font='20px Tahoma,sans-serif';X.fillStyle=p.line;X.direction='ltr';X.textAlign='left';X.textBaseline='top';
+ X.fillText((i+1)+' / '+D.length,80,690);window.ovl&&ovl()}
+(function loop(){if(dirty||Rc||(window.needFrame&&needFrame())){draw();dirty=false}requestAnimationFrame(loop)})();
+
+function save(){try{localStorage.setItem('deck1',JSON.stringify(D))}catch(e){try{localStorage.setItem('deck1',JSON.stringify(D.map(z=>({...z,im:[]}))))}catch(e2){}}}
+function thumbs(){const e=$('th');e.innerHTML='';D.forEach((z,j)=>{const b=document.createElement('button');b.textContent=(j+1)+'. '+(z.t||'بدون عنوان');if(j==i)b.className='on';b.onclick=()=>{i=j;ui()};e.append(b)});$('no').textContent=(i+1)+' / '+D.length}
+function vis(){const k=cur().k;$('ir').style.display=k=='text'?'':'none';$('dl_').style.display=(k=='text'||k=='img')?'none':'';$('cl_').style.display=k=='chart'?'':'none';$('dh').textContent=k=='table'?'جدول: هر خط یک ردیف، ستون‌ها با کاما':'نمودار: هر خط «برچسب,عدد»';$('sv').textContent=cur().s}
+function ui(){['t','b','k','f','s','d','c'].forEach(id=>$(id).value=cur()[id]);vis();thumbs();dirty=true;save()}
+['t','b','k','f','s','d','c'].forEach(id=>$(id).oninput=()=>{
+ const Z=cur();Z[id]=id=='s'?+$(id).value:$(id).value;
+ if(id=='k'&&!Z.d)Z.d=Z.k=='table'?'نام,مقدار\nالف,10\nب,20':'الف,10\nب,25\nج,15';
+ if(id=='k')$('d').value=Z.d;
+ vis();thumbs();dirty=true;save()});
+$('ai').onchange=async e=>{const Z=cur();Z.im=Z.im||[];for(const f of e.target.files){const u=await fit(f,/png/i.test(f.type));if(u)Z.im.push({u})}e.target.value='';ui()};
+$('ci').onclick=()=>{cur().im=[];ui()};
+$('add').onclick=()=>{D.splice(i+1,0,mk('عنوان جدید',''));i++;ui()};
+$('dup').onclick=()=>{D.splice(i+1,0,{...cur()});i++;ui()};
+$('del').onclick=()=>{if(D.length>1){D.splice(i,1);i=Math.min(i,D.length-1);ui()}};
+$('up').onclick=()=>{if(i>0){[D[i-1],D[i]]=[D[i],D[i-1]];i--;ui()}};
+$('dn').onclick=()=>{if(i<D.length-1){[D[i+1],D[i]]=[D[i],D[i+1]];i++;ui()}};
+const go=n=>{if(n>=0&&n<D.length){i=n;ui()}};
+$('nx').onclick=()=>go(i+1);$('pv').onclick=()=>go(i-1);
+addEventListener('keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if(e.key=='ArrowLeft'||e.key==' ')go(i+1);if(e.key=='ArrowRight')go(i-1)});
+$('tg').onclick=()=>{th=th=='dark'?'light':'dark';document.documentElement.dataset.th=th;try{localStorage.setItem('th',th)}catch(e){}dirty=true};
+function size(){const q=Q[$('q').value];cv.width=q.w;cv.height=q.h;dirty=true}
+$('q').onchange=size;
+
+window.impEdit=async f=>{
+ try{
+  if(typeof JSZip=='undefined')throw 0;
+  const z=await JSZip.loadAsync(f),ks=Object.keys(z.files).filter(k=>/^ppt\/slides\/slide\d+\.xml$/.test(k)).sort((a,b)=>a.match(/\d+/)-b.match(/\d+/)),out=[];
+  for(const k of ks){
+   const x=new DOMParser().parseFromString(await z.file(k).async('string'),'application/xml');
+   const ps=[...x.getElementsByTagName('a:p')].map(p=>[...p.getElementsByTagName('a:t')].map(t=>t.textContent).join('')).filter(Boolean);
+   const m=mk(ps[0],ps.slice(1).join('\n'));m.im=await slideImgs(z,k,x);out.push(m)}
+  if(!out.length)throw 0;D=out;i=0;ui()
+ }catch(err){alert('خواندن فایل ممکن نشد. فقط فایل .pptx پشتیبانی می‌شود و فقط متن اسلایدها وارد می‌شود.')}};
+$('imp').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(window.importFile)importFile(f);else impEdit(f)};
+
+async function rec(){
+ if(Rc){Rc.stop();return}
+ const q=Q[$('q').value];size();draw();
+ const mt=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm'].find(m=>window.MediaRecorder&&MediaRecorder.isTypeSupported(m));
+ if(!mt){alert('این مرورگر ضبط ویدیو را پشتیبانی نمی‌کند. از Chrome یا Safari جدید استفاده کن.');return}
+ let mic;try{mic=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){alert('دسترسی به میکروفون ممکن نشد. اجازهٔ میکروفون را بده.');return}
+ const st=cv.captureStream(q.fps);mic.getAudioTracks().forEach(t=>st.addTrack(t));
+ ch=[];Rc=new MediaRecorder(st,{mimeType:mt,videoBitsPerSecond:q.b,audioBitsPerSecond:64000});
+ Rc.ondataavailable=e=>e.data.size&&ch.push(e.data);
+ Rc.onstop=()=>{
+  clearInterval(tmr);mic.getTracks().forEach(t=>t.stop());Rc=null;
+  const ext=mt.includes('mp4')?'mp4':'webm',bl=new Blob(ch,{type:'video/'+ext}),u=URL.createObjectURL(bl);
+  last={bl,ext};
+  $('out').innerHTML='<video controls playsinline src="'+u+'"></video><div class="bar"><button id="sv2" class="p">💾 ذخیره '+ext.toUpperCase()+' ('+(bl.size/1048576).toFixed(1)+' MB)</button></div>'+(ext=='webm'?'<p>این مرورگر mp4 نمی‌دهد و خروجی webm شد؛ برای mp4 از Chrome یا Safari جدید استفاده کن.</p>':'');
+  $('sv2').onclick=async()=>{
+   try{const d=window.claude&&await window.claude.use('downloads');if(d){await d.save({filename:'presentation.'+ext,data:bl})}else{const a=document.createElement('a');a.href=u;a.download='presentation.'+ext;document.body.append(a);a.click();a.remove()}}
+   catch(e){if(!e||e.code!='declined')alert('ذخیره از اینجا ممکن نشد. ویدیو را در پخش‌کننده بالا نگه دار و ذخیره کن.')}};
+  $('rec').textContent='● شروع ضبط';$('rec').className='p';$('tm').textContent=''};
+ i=0;ui();Rc.start(1000);
+ const t0=Date.now();tmr=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);$('tm').textContent='🔴 '+String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},500);
+ $('rec').textContent='■ توقف ضبط';$('rec').className='r'}
+$('rec').onclick=rec;
+
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e});
+$('ins').onclick=()=>{if(dp){dp.prompt()}else alert('اندروید/کامپیوتر (Chrome/Edge): از منوی مرورگر «Install app» یا «Add to Home screen».\nآیفون (Safari): دکمهٔ Share ← Add to Home Screen.')};
+
+size();ui();
+</script>
+<script src="studio.js"></script>
+</body>
+</html>
