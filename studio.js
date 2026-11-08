@@ -51,6 +51,28 @@ document.addEventListener('visibilitychange',function(){if(document.hidden&&idb)
 /* ============ منبع فایل (PPTX / PDF) ============ */
 var pdfjs=null;
 async function getPdf(){if(!pdfjs){try{pdfjs=await import('./pdf.min.mjs')}catch(e){throw new Error('فایل‌های pdf.min.mjs و pdf.worker.min.mjs باید کنار index.html آپلود شده باشند')}pdfjs.GlobalWorkerOptions.workerSrc='./pdf.worker.min.mjs'}return pdfjs}
+
+var AR=/[؀-ۿﭐ-﷿ﹰ-﻿]/;
+var FIN=[0xFE8F,0xFE90,0xFE95,0xFE96,0xFE99,0xFE9A,0xFE9D,0xFE9E,0xFEA1,0xFEA2,0xFEA5,0xFEA6,0xFEB1,0xFEB2,0xFEB5,0xFEB6,0xFEB9,0xFEBA,0xFEBD,0xFEBE,0xFEC1,0xFEC2,0xFEC5,0xFEC6,0xFEC9,0xFECA,0xFECD,0xFECE,0xFED1,0xFED2,0xFED5,0xFED6,0xFED9,0xFEDA,0xFEDD,0xFEDE,0xFEE1,0xFEE2,0xFEE5,0xFEE6,0xFEE9,0xFEEA,0xFEF1,0xFEF2,0xFB56,0xFB57,0xFB7A,0xFB7B,0xFB8E,0xFB8F,0xFB92,0xFB93,0xFBFC,0xFBFD].map(function(c){return String.fromCharCode(c)}).join('');
+var ZWRE=new RegExp('(['+FIN+'])(?=[\\u0621-\\u06FF\\uFB50-\\uFEFF])','g');
+function zw(t){return t.replace(ZWRE,'$1\u200c')}
+function pdfLines(items){
+ var its=items.filter(function(t){return t.str!=null&&t.str!==''}).map(function(t){return{s:t.str,l:t.transform[4],r:t.transform[4]+Math.abs(t.width||0),y:t.transform[5],h:Math.abs(t.height||t.transform[3]||10)||10}});
+ if(!its.length)return'';
+ its.sort(function(a,b){return b.y-a.y});var lines=[];
+ its.forEach(function(it){var L=lines[lines.length-1];if(L&&Math.abs(L.y-it.y)<Math.max(3,it.h*.45)){L.a.push(it)}else lines.push({y:it.y,a:[it],h:it.h})});
+ var out=[];
+ lines.forEach(function(L){var all=L.a.map(function(t){return t.s}).join(''),rtl=(all.match(new RegExp(AR.source,"g"))||[]).length>all.replace(/\s/g,'').length*.3;
+  var a=L.a.slice().sort(function(p,q){return rtl?q.l-p.l:p.l-q.l});
+  if(rtl){var res=[],grp=[];var flush=function(){if(grp.length){grp.reverse();res.push.apply(res,grp);grp=[]}};
+   a.forEach(function(t){if(!AR.test(t.s)&&/[0-9A-Za-z]/.test(t.s))grp.push(t);else{flush();res.push(t)}});flush();a=res}
+  var txt='',prev=null;
+  a.forEach(function(t){var str=t.s;if(prev){var gap=rtl?(prev.l-t.r):(t.l-prev.r);var sp=/^\s/.test(str)||/\s$/.test(prev.s);if(!sp&&gap>t.h*.22)txt+=' '}txt+=str;prev=t});
+  out.push({t:zw(txt).replace(/\s+/g,' ').trim(),y:L.y,h:L.h})});
+ var paras=[],cur='',py=null,ph=null;
+ out.forEach(function(L){if(!L.t)return;if(py!==null&&((py-L.y)>Math.max(ph,L.h)*1.9||Math.abs(L.h-ph)/ph>.15)){paras.push(cur);cur=''}cur+=(cur?' ':'')+L.t;py=L.y;ph=L.h});
+ if(cur)paras.push(cur);
+ return paras.join('\n').normalize('NFKC')}
 var LASTFILE=null;
 async function openSource(f){
  var name=f.name||'file',buf=await f.arrayBuffer();
@@ -59,9 +81,7 @@ async function openSource(f){
   return{kind:'pdf',doc:doc,n:doc.numPages,name:name,hidden:[],OPS:pd.OPS,
    render:async function(k,c,w){var pg=await doc.getPage(k+1),v0=pg.getViewport({scale:1}),v=pg.getViewport({scale:w/v0.width});c.width=Math.round(v.width);c.height=Math.round(v.height);var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);await pg.render({canvasContext:g,viewport:v}).promise},
    ratio:async function(){var p=await doc.getPage(1),v=p.getViewport({scale:1});return v.height/v.width},
-   text:async function(k){var pg=await doc.getPage(k+1),tc=await pg.getTextContent();var items=tc.items.filter(function(t){return t.str&&t.str.trim()}).map(function(t){return{s:t.str,x:t.transform[4],y:t.transform[5]}}).sort(function(a,b){return b.y-a.y||a.x-b.x}),lines=[];
-    items.forEach(function(it){var l=lines[lines.length-1];if(l&&Math.abs(l.y-it.y)<4)l.a.push(it);else lines.push({y:it.y,a:[it]})});
-    return lines.map(function(l){var rtl=/[؀-ۿ]/.test(l.a.map(function(t){return t.s}).join(''));l.a.sort(function(p,q){return rtl?q.x-p.x:p.x-q.x});return l.a.map(function(t){return t.s}).join(' ')}).join('\n').normalize('NFKC')}}}
+   text:async function(k){var pg=await doc.getPage(k+1),tc=await pg.getTextContent();return pdfLines(tc.items)}}}
  if(/\.(pptx|ppsx)$/i.test(name)){
   if(!window.PPTX||typeof JSZip=='undefined')throw new Error('فایل pptx.js و jszip.min.js باید کنار index.html باشند');
   var d=await PPTX.load(buf);if(!d.slides.length)throw new Error('این فایل اسلایدی ندارد');
@@ -80,12 +100,16 @@ window.importFile=async function(f){
   q$('#m2',o).onclick=function(){o.remove();impEdit(f)};
   return}
  alert('این قالب پشتیبانی نمی‌شود. فایل را در پاورپوینت روی «ذخیره با نام ← pptx» یا PDF بگذار.')};
+function pickRange(n,name){return new Promise(function(res){
+ var o=modal('<b>کدام صفحه‌ها وارد شود؟</b><small>«'+esc(name)+'» '+fa(n)+' صفحه دارد. برای سرعت و حافظه، فقط همان‌هایی را که لازم داری وارد کن (شماره‌ی صفحه‌ی خود فایل).</small><div class="rw">از صفحه <input type="number" id="r1" min="1" max="'+n+'" value="1" style="width:80px"> تا <input type="number" id="r2" min="1" max="'+n+'" value="'+Math.min(n,30)+'" style="width:80px"></div><div class="rw"><button class="p" id="r3">وارد کن</button><button id="r4">انصراف</button></div>');
+ q$('#r3',o).onclick=function(){var a=Math.max(1,Math.min(n,+q$('#r1',o).value||1)),b=Math.max(a,Math.min(n,+q$('#r2',o).value||n));o.remove();res([a-1,b-1])};q$('#r4',o).onclick=function(){o.remove();res(null)}})}
 async function importImages(f){
  busy('در حال باز کردن فایل…');
  try{
   var s=await openSource(f),out=[],c=document.createElement('canvas'),t=document.createElement('canvas');c.width=1600;c.height=900;var g=c.getContext('2d');
-  var ratio=await s.ratio(),w=ratio<=9/16?1600:Math.round(900/ratio);
-  for(var k=0;k<s.n;k++){
+  var ratio=await s.ratio(),w=ratio<=9/16?1600:Math.round(900/ratio),rg=[0,s.n-1];
+  if(s.n>12){busy();rg=await pickRange(s.n,f.name);if(!rg)return;busy('در حال خواندن صفحه‌ها…')}
+  for(var k=rg[0];k<=rg[1];k++){
    if(s.hidden[k])continue;busy('در حال خواندن صفحه‌ها… '+fa(k+1)+' از '+fa(s.n));await wait(0);
    try{await s.render(k,t,Math.max(w,1000))}catch(e){continue}
    g.fillStyle='#fff';g.fillRect(0,0,1600,900);var sc=Math.min(1600/t.width,900/t.height),dw=t.width*sc,dh=t.height*sc;g.drawImage(t,(1600-dw)/2,(900-dh)/2,dw,dh);
@@ -429,11 +453,19 @@ async function aiImage(prompt){if(!AI.ikey)throw new Error('کلید تصویر�
  if(d.url)return await(await fetch(d.url)).blob();throw new Error('قالب پاسخ تصویرساز ناشناخته بود')}
 async function fetchBlob(u){var r=await fetch(u);if(!r.ok)throw new Error('دانلود تصویر '+r.status);return await r.blob()}
 function slideText(Z){return(Z.txt||((Z.t||'')+'\n'+(Z.b||'')+(Z.k!='text'&&Z.d?'\n'+Z.d:''))).trim()}
-function offlineSlide(idx,text){var lines=text.split(/\n+/).map(function(s){return s.trim()}).filter(Boolean),title=(lines[0]||'').slice(0,70),rest=lines.slice(1).join(' ');
- var sents=rest.split(/[.؟?!۔]+\s+/).map(function(s){return s.trim()}).filter(function(s){return s.length>12}).slice(0,4).map(function(s){return s.length>130?s.slice(0,127)+'…':s});
- return{idx:idx,title:title,bullets:sents,queries:title?[title]:[],aiPrompt:'Clear educational illustration about: '+title+'. No text in the image.',diagram:false}}
+var STOP={};'و در به از که این را با است برای آن یک هم یا تا بر شده می‌شود شد های ها ی می‌ باید هر دو نیز اما اگر چون پس بود بود. کرد کند کنند شود شوند دارد دارند بین روی زیر آنها آن‌ها خود وی ما شما او من the of and to in is a for'.split(' ').forEach(function(w){STOP[w]=1});
+function offlineSlide(idx,text){
+ var paras=text.split(/\n+/).map(function(x){return x.trim()}).filter(Boolean),first=paras[0]||'';
+ var shortTitle=first.length<=60&&paras.length>1;
+ var body=(shortTitle?paras.slice(1):paras).join(' ');
+ var sents=body.split(/[.؟?!۔]+\s+|\s[•\-–]\s/).map(function(x){return x.trim()}).filter(function(x){return x.length>=25&&x.length<=400});
+ var freq={};sents.forEach(function(x){x.split(/[\s،,؛:()«»"]+/).forEach(function(w){w=w.replace(/[‌]/g,'');if(w.length>2&&!STOP[w])freq[w]=(freq[w]||0)+1})});
+ var sc=sents.map(function(x,k){var ws=x.split(/\s+/),t=0;ws.forEach(function(w){t+=freq[w.replace(/[‌]/g,'')]||0});return{k:k,x:x,v:t/Math.sqrt(ws.length)+(k==0?1.5:0)}});
+ var pick=sc.slice().sort(function(a,b){return b.v-a.v}).slice(0,4).sort(function(a,b){return a.k-b.k}).map(function(o){var t=o.x;if(t.length>120){t=t.slice(0,118);var sp=t.lastIndexOf(' ');t=(sp>60?t.slice(0,sp):t)+'…'}return t});
+ var title=shortTitle?first:(sents[0]||first).split(/\s+/).slice(0,7).join(' ');
+ return{idx:idx,title:title.slice(0,70),bullets:pick,queries:[title.slice(0,70)],aiPrompt:'Clear educational illustration about: '+title+'. No text in the image.',diagram:false}}
 function makeFlow(items){var W=900,H=900,c=document.createElement('canvas');c.width=W;c.height=H;var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,W,H);
- var cols=['#8b5a2b','#c89560','#a0522d','#d2b48c','#6b4226'],it=items.slice(0,5).map(function(t){return t.length>40?t.slice(0,38)+'…':t}),n=it.length||1,gap=50,bh=(H-80-gap*(n-1))/n;
+ var cols=['#8b5a2b','#c89560','#a0522d','#d2b48c','#6b4226'],it=items.slice(0,5).map(function(t){var w=t.replace(/^[•\s]+/,'').split(/\s+/);return w.slice(0,6).join(' ')}),n=it.length||1,gap=50,bh=(H-80-gap*(n-1))/n;
  g.direction='rtl';g.textAlign='center';g.textBaseline='middle';
  it.forEach(function(t,k){var y=40+k*(bh+gap);g.fillStyle=cols[k%5];g.beginPath();if(g.roundRect)g.roundRect(40,y,W-80,bh,24);else g.rect(40,y,W-80,bh);g.fill();
   g.fillStyle=k%2?'#2a1a0e':'#fff';var fs=Math.min(44,bh*.3);g.font='bold '+fs+'px Vazirmatn,Tahoma,sans-serif';
@@ -441,36 +473,51 @@ function makeFlow(items){var W=900,H=900,c=document.createElement('canvas');c.wi
   ls.forEach(function(l,j){g.fillText(l,W/2,y+bh/2+(j-(ls.length-1)/2)*fs*1.3)});
   if(k<n-1){g.fillStyle='#8a7a68';g.beginPath();g.moveTo(W/2-24,y+bh+8);g.lineTo(W/2+24,y+bh+8);g.lineTo(W/2,y+bh+gap-8);g.closePath();g.fill()}});
  return new Promise(function(r){c.toBlob(r,'image/png')})}
+function buildPrompt(items,nSl){
+ var txt=items.map(function(p){return'### صفحه '+(p.idx+1)+'\n'+p.text.slice(0,2500)}).join('\n\n');
+ return'تو یک معلم باتجربه و طراح ارائه‌ی آموزشی هستی. از متن کتاب زیر یک ارائه‌ی پاورپوینتِ خلاصه و روان برای دانش‌آموزان بساز.\n\nقواعد:\n- حدود '+nSl+' اسلاید بساز (مفاهیم مرتبط را در یک اسلاید جمع کن، یک موضوع در هر اسلاید).\n- متن را کلمه‌به‌کلمه کپی نکن؛ خلاصه و با جمله‌های کوتاه و ساده‌ی فارسی بنویس.\n- هر اسلاید: عنوان کوتاه (حداکثر ۷ کلمه) و ۳ تا ۵ نکته‌ی کوتاه (هرکدام حداکثر ۱۴ کلمه).\n- برای هر اسلاید ۲ تا ۳ عبارت جستجوی «انگلیسی» برای پیدا کردن عکس در Wikimedia Commons بده؛ اسم‌های مشخص و قابل‌دیدن مثل نام سنگ، کانی یا پدیده (مثلاً \\"peridotite rock\\"، \\"chalcopyrite mineral\\")، نه مفهوم انتزاعی.\n- اگر محتوای اسلاید یک فرایند مرحله‌به‌مرحله است diagram را true بگذار، وگرنه false.\n- متن از روی فایل PDF خوانده شده و ممکن است غلط‌های املایی استخراج داشته باشد (مثلاً «باالتر» یعنی «بالاتر»، «اطالعات» یعنی «اطلاعات»)؛ در خروجی املای درست فارسی بنویس.\n- فقط و فقط یک آرایه‌ی JSON معتبر بده، بدون هیچ توضیح یا متن اضافه و بدون ```.\n\nقالب خروجی:\n[{"page":<شماره‌ی صفحه‌ی اصلی>,"title":"...","bullets":["...","..."],"queries":["english query 1","english query 2"],"ai_prompt":"English prompt for an educational illustration, no text inside the image","diagram":false}]\n\nمتن کتاب:\n\n'+txt}
+function parseSlides(t,items){
+ t=String(t||'').replace(/```(?:json)?/gi,'').replace(/[“”]/g,'"');var arr=null;
+ try{var m=t.match(/\[[\s\S]*\]/);arr=JSON.parse(m?m[0]:t)}catch(e){try{var o=JSON.parse(t.match(/\{[\s\S]*\}/)[0]);arr=o.slides||o.items||null}catch(e2){}}
+ if(!Array.isArray(arr)||!arr.length)throw new Error('جواب قابل‌خواندن نبود. باید فقط همان آرایه‌ی JSON باشد؛ دوباره از هوش مصنوعی بخواه «فقط JSON بده».');
+ return arr.map(function(a,k){var pg=+a.page||0,it=items.filter(function(x){return x.idx+1===pg})[0]||items[Math.min(k,items.length-1)];
+  return{idx:it?it.idx:0,title:String(a.title||'').slice(0,80),bullets:(a.bullets||[]).map(String).slice(0,6),queries:(a.queries||[]).map(String).slice(0,3),aiPrompt:String(a.ai_prompt||a.aiPrompt||a.title||''),diagram:!!a.diagram}}).filter(function(x){return x.title||x.bullets.length})}
 function wizDlg(){
  var n=D.length,hasC=!!AI.ckey,hasI=!!AI.ikey,run=null,cancel=false;
- var o=modal('<b>🪄 ساخت ارائه‌ی تازه با تصویرهای مرتبط</b><small>متن اسلایدها/صفحه‌های ارائه یا کتابی که وارد کرده‌ای خوانده می‌شود و برای هر کدام یک اسلاید تازه با تصویر مرتبط (از بیرون کتاب) ساخته می‌شود. پیش از نهایی‌شدن همه‌چیز را می‌بینی. ارائه‌ی فعلی هم با «↩ برگشت» برمی‌گردد.</small>'+
- '<div class="rw">از اسلاید <input type="number" id="wf" min="1" max="'+n+'" value="1" style="width:70px"> تا <input type="number" id="wt" min="1" max="'+n+'" value="'+Math.min(n,10)+'" style="width:70px"><small>(از '+fa(n)+')</small></div>'+
- '<label class="k"><input type="checkbox" id="wc" '+(hasC?'checked':'disabled')+'> خلاصه‌نویسی و انتخاب عبارت جستجو با Claude '+(hasC?'':'<small>(کلید را در ⚙ تنظیمات بگذار)</small>')+'</label>'+
+ var o=modal('<b>🪄 ساخت ارائه‌ی تازه با تصویرهای مرتبط</b><small>متن اسلایدها/صفحه‌های ارائه یا کتابی که وارد کرده‌ای خوانده می‌شود و ارائه‌ی تازه با تصویر مرتبط (از بیرون کتاب) ساخته می‌شود. پیش از نهایی‌شدن همه‌چیز را می‌بینی؛ ارائه‌ی فعلی هم با «↩ برگشت» برمی‌گردد.</small>'+
+ '<div class="rw">از اسلاید <input type="number" id="wf" min="1" max="'+n+'" value="1" style="width:70px"> تا <input type="number" id="wt" min="1" max="'+n+'" value="'+Math.min(n,10)+'" style="width:70px"><small>(از '+fa(n)+')</small> &nbsp; تعداد اسلاید ارائه: <input type="number" id="wn" min="2" max="40" style="width:70px" placeholder="خودکار"></div>'+
+ '<div class="wc0" style="border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px"><b>روش خلاصه‌نویسی</b>'+
+ '<label class="k"><input type="radio" name="wm" value="prompt" '+(hasC?'':'checked')+'> 📋 بدون کلید: پرامپت می‌سازم، تو در ChatGPT / Gemini / Claude می‌گذاری و جواب را برمی‌گردانی (پیشنهادی، رایگان)</label>'+
+ '<label class="k"><input type="radio" name="wm" value="claude" '+(hasC?'checked':'disabled')+'> 🤖 خودکار با کلید Claude '+(hasC?'':'<small>(کلید ندارم)</small>')+'</label>'+
+ '<label class="k"><input type="radio" name="wm" value="simple"> ✂️ ساده بدون هوش مصنوعی (فقط جمله‌های مهم؛ خلاصه‌ی ضعیف)</label></div>'+
  '<label class="k"><input type="checkbox" id="ww" checked> جستجوی عکس آزاد در ویکی‌مدیا (نیاز به اینترنت)</label>'+
- '<label class="k"><input type="checkbox" id="wa" '+(hasI?'':'disabled')+'> ساخت عکس با هوش مصنوعی '+(hasI?'<small>(هزینه دارد)</small>':'<small>(کلید را در ⚙ تنظیمات بگذار)</small>')+'</label>'+
- '<label class="k"><input type="checkbox" id="wd" checked> اگر عکسی پیدا نشد، شکل ساده (کادر و فلش) بساز</label>'+
- '<div id="ws" style="font-size:13px;min-height:22px"></div><div id="wr"></div><div class="rw"><button class="p" id="wg">▶ شروع</button><button id="wx">بستن</button></div>',true);
- var s=function(x){return q$(x,o)},say=function(t){s('#ws').textContent=t};
+ '<label class="k"><input type="checkbox" id="wa" '+(hasI?'':'disabled')+'> ساخت عکس با هوش مصنوعی '+(hasI?'<small>(هزینه دارد)</small>':'<small>(کلید ندارم)</small>')+'</label>'+
+ '<label class="k"><input type="checkbox" id="wd" checked> اگر محتوا فرایند بود، شکل ساده (کادر و فلش) بساز</label>'+
+ '<div id="wp" style="display:none;flex-direction:column;gap:6px"><b>۱) این پرامپت را کپی کن و در هوش مصنوعی بگذار:</b><textarea id="wp1" rows="6" readonly dir="rtl"></textarea><button id="wp2">📋 کپی پرامپت</button><b>۲) جواب هوش مصنوعی را اینجا بچسبان:</b><textarea id="wp3" rows="6" dir="ltr" placeholder="[{&quot;page&quot;:28,&quot;title&quot;:...}]"></textarea></div>'+
+ '<div id="ws" style="font-size:13px;min-height:22px"></div><div id="wr"></div><div class="rw"><button class="p" id="wg">▶ ادامه</button><button id="wx">بستن</button></div>',true);
+ var s=function(x){return q$(x,o)},say=function(t){s('#ws').textContent=t},items=null,stage=0;
  s('#wx').onclick=function(){cancel=true;o.remove()};
- s('#wg').onclick=async function(){if(run)return;run=1;var from=Math.max(1,Math.min(n,+s('#wf').value||1))-1,to=Math.max(from,Math.min(n,+s('#wt').value||n)-1);
-  var opt={from:from,to:to,claude:s('#wc').checked&&hasC,wiki:s('#ww').checked,ai:s('#wa').checked&&hasI,dia:s('#wd').checked};s('#wg').disabled=true;
-  try{var sl=await wizRun(opt,say,function(){return cancel});if(!cancel)wizReview(o,sl,opt)}catch(e){console.error(e);say('⚠ '+(e.message||'ناموفق بود'))}run=null;if(s('#wg'))s('#wg').disabled=false}}
-async function wizRun(opt,say,stop){
- var items=[];for(var k=opt.from;k<=opt.to&&!stop();k++){var t=slideText(D[k]);if(t.length>=25)items.push({idx:k,text:t})}
- if(!items.length)throw new Error('متنی در این اسلایدها پیدا نشد (ممکن است فایل اسکن‌شده باشد)');
- var slides=null,warn='';
- if(opt.claude){slides=[];var sys='You turn Persian textbook pages into presentation slides. Reply with a JSON array only, no commentary.';
-  for(var b=0;b<items.length&&!stop();b+=5){var part=items.slice(b,b+5);say('Claude در حال خلاصه‌کردن ('+fa(Math.min(b+5,items.length))+' از '+fa(items.length)+')…');
-   var prompt='برای هر صفحه‌ی زیر یک اسلاید بساز. فقط یک آرایه‌ی JSON بده با این قالب:\n[{"page":<شماره>,"title":"عنوان کوتاه فارسی (حداکثر ۸ کلمه)","bullets":["حداکثر ۴ نکته‌ی کوتاه فارسی، هرکدام حداکثر ۱۵ کلمه"],"queries":["2 تا 3 عبارت جستجوی انگلیسی برای عکس در Wikimedia Commons؛ اسم‌های مشخص و قابل‌دیدن مثل نام پدیده یا مکان، نه مفاهیم انتزاعی"],"ai_prompt":"English prompt for an educational illustration, no text inside the image","diagram":true یا false (true اگر محتوا یک فرایند/مراحل است)}]\nتصویرها باید موضوع را نشان بدهند و از بیرون کتاب باشند، نه از خود صفحه.\n\n'+part.map(function(p){return'### PAGE '+(p.idx+1)+'\n'+p.text.slice(0,1800)}).join('\n\n');
-   try{var arr=parseJSON(await claudeAsk(sys,prompt,4000));arr.forEach(function(a,ai){var p=part.filter(function(x){return x.idx+1===+a.page})[0]||part[ai];if(!p)return;slides.push({idx:p.idx,title:String(a.title||'').slice(0,80),bullets:(a.bullets||[]).map(String).slice(0,4),queries:(a.queries||[]).map(String).slice(0,3),aiPrompt:String(a.ai_prompt||a.title||''),diagram:!!a.diagram})})}
-   catch(e){console.error(e);warn='⚠ Claude برای بعضی صفحه‌ها جواب نداد؛ آن‌ها بدون خلاصه‌نویسی ساخته شدند. ';part.forEach(function(p){slides.push(offlineSlide(p.idx,p.text))})}}
-  var have={};slides.forEach(function(x){have[x.idx]=1});items.forEach(function(p){if(!have[p.idx])slides.push(offlineSlide(p.idx,p.text))});slides.sort(function(a,b){return a.idx-b.idx})}
- else slides=items.map(function(p){return offlineSlide(p.idx,p.text)});
+ s('#wp2').onclick=function(){var t=s('#wp1');t.select();var done=function(){toast('کپی شد؛ در هوش مصنوعی بچسبان')};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t.value).then(done,function(){document.execCommand('copy');done()});else{document.execCommand('copy');done()}};
+ function readItems(from,to){var it=[];for(var k=from;k<=to;k++){var t=slideText(D[k]);if(t.length>=25)it.push({idx:k,text:t})}return it}
+ s('#wg').onclick=async function(){if(run)return;var from=Math.max(1,Math.min(n,+s('#wf').value||1))-1,to=Math.max(from,Math.min(n,+s('#wt').value||n)-1);
+  var mode=(q$('input[name=wm]:checked',o)||{}).value||'simple';
+  var opt={from:from,to:to,mode:mode,wiki:s('#ww').checked,ai:s('#wa').checked&&hasI,dia:s('#wd').checked};
+  items=readItems(from,to);if(!items.length){say('⚠ متنی در این اسلایدها پیدا نشد (ممکن است فایل اسکن‌شده باشد)');return}
+  var nSl=+s('#wn').value||Math.max(4,Math.round(items.length*1.6));
+  if(mode=='prompt'&&stage==0){s('#wp1').value=buildPrompt(items,nSl);s('#wp').style.display='flex';stage=1;say('پرامپت آماده است: کپی کن، در ChatGPT یا Gemini یا Claude بگذار، جواب را در کادر دوم بچسبان و دوباره «ادامه» بزن.');s('#wg').textContent='▶ ساخت ارائه از جواب';return}
+  run=1;s('#wg').disabled=true;
+  try{var sl;
+   if(mode=='prompt')sl=parseSlides(s('#wp3').value,items);
+   else if(mode=='claude'){say('Claude در حال خلاصه‌نویسی…');sl=parseSlides(await claudeAsk('You are an expert teacher who makes presentation slides. Reply with a JSON array only.',buildPrompt(items,nSl),6000),items)}
+   else sl=items.map(function(p){return offlineSlide(p.idx,p.text)});
+   sl=await wizImages(sl,opt,say,function(){return cancel});if(!cancel)wizReview(o,sl,opt)}
+  catch(e){console.error(e);say('⚠ '+(e.message||'ناموفق بود'))}run=null;if(s('#wg'))s('#wg').disabled=false}}
+async function wizImages(slides,opt,say,stop){var warn='';
  for(var m=0;m<slides.length&&!stop();m++){var s=slides[m];s.cands=[];s.chosen='none';
   if(opt.wiki){say('در حال جستجوی عکس برای اسلاید '+fa(m+1)+' از '+fa(slides.length)+'…');
    for(var qi=0;qi<s.queries.length;qi++){try{var r=await wikiSearch(s.queries[qi],8);r.forEach(function(c){if(!s.cands.some(function(x){return x.thumb===c.thumb}))s.cands.push(c)})}catch(e){console.error(e);warn=warn||'⚠ جستجوی ویکی‌مدیا انجام نشد (اینترنت یا فیلترشکن را بررسی کن). ';break}if(s.cands.length>=4)break}}
   if(opt.ai){say('در حال ساختن تصویر با هوش مصنوعی برای اسلاید '+fa(m+1)+' از '+fa(slides.length)+'…');try{s.aiBlob=await aiImage(s.aiPrompt||s.title);s.aiUrl=URL.createObjectURL(s.aiBlob);s.chosen='ai'}catch(e){console.error(e);warn=warn||'⚠ ساخت تصویر با هوش مصنوعی ناموفق بود: '+e.message+' '}}
-  if(s.chosen==='none')s.chosen=s.cands.length?0:(opt.dia&&s.bullets.length>1?'dia':'none')}
+  if(s.chosen==='none')s.chosen=s.cands.length?0:(opt.dia&&s.diagram&&s.bullets.length>1?'dia':'none')}
  slides.warn=warn;return slides}
 function wizReview(o,slides,opt){
  var s0=function(x){return q$(x,o)};s0('#ws').textContent=(slides.warn||'')+fa(slides.length)+' اسلاید آماده است. عکس هر اسلاید را انتخاب کن یا متن را ویرایش کن، بعد «ساخت ارائه» را بزن.';
@@ -480,7 +527,7 @@ function wizReview(o,slides,opt){
   s.cands.map(function(c,j){return'<div class="it '+(s.chosen===j?'sel':'')+'" data-c="'+j+'"><img src="'+esc(c.thumb)+'"></div>'}).join('')+
   '<div class="it '+(s.chosen==='dia'?'sel':'')+'" data-c="dia">📊 شکل ساده</div><div class="it '+(s.chosen==='none'?'sel':'')+'" data-c="none">بدون تصویر</div></div>'+
   '<div class="rw"><input type="text" class="wq" dir="ltr" value="'+esc(s.queries[0]||'')+'" style="flex:1;min-width:120px"><button class="wsr">🔍 جستجو</button>'+(AI.ikey?'<button class="wai">🤖 ساخت با AI</button>':'')+'</div></div>'}).join('')+'<div class="rw"><button class="p" id="wk">✅ ساخت ارائه</button></div>'}
- render();s0('#wg').style.display='none';
+ render();s0('#wg').style.display='none';s0('#wp').style.display='none';
  function sync(){o.querySelectorAll('.wc').forEach(function(c){var s=slides[+c.dataset.k];s.title=c.querySelector('.wt').value.trim();s.bullets=c.querySelector('.wb').value.split('\n').map(function(x){return x.trim()}).filter(Boolean);s.queries[0]=c.querySelector('.wq').value.trim()})}
  s0('#wr').onclick=async function(e){var card=e.target.closest('.wc');if(!card)return;var s=slides[+card.dataset.k];
   var it=e.target.closest('.it');if(it){sync();var c=it.dataset.c;s.chosen=(c==='ai'||c==='dia'||c==='none')?c:+c;render();return}
@@ -488,7 +535,7 @@ function wizReview(o,slides,opt){
   if(e.target.closest('.wai')){sync();var b2=e.target.closest('button');b2.disabled=true;b2.textContent='در حال ساختن…';try{s.aiBlob=await aiImage(s.aiPrompt||s.title);s.aiUrl=URL.createObjectURL(s.aiBlob);s.chosen='ai'}catch(err){toast(err.message)}render()}};
  s0('#wk').onclick=async function(){sync();s0('#wk').disabled=true;var out=[],fail=0;
   for(var k=0;k<slides.length;k++){var s=slides[k];s0('#ws').textContent='در حال آماده‌سازی اسلاید '+fa(k+1)+' از '+fa(slides.length)+'…';
-   var z=mk(s.title,s.bullets.join('\n'));
+   var z=mk(s.title,s.bullets.map(function(x){return'• '+x.replace(/^[•\s]+/,'')}).join('\n'));
    try{var bl=null;
     if(s.chosen==='ai')bl=s.aiBlob;
     else if(typeof s.chosen==='number'){var c=s.cands[s.chosen];bl=c.blob||(c.blob=await fetchBlob(c.thumb));z.cr=c.credit}
