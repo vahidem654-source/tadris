@@ -41,7 +41,7 @@ video{width:100%;border-radius:12px;margin-top:8px}
 </head>
 <body>
 <header>
-<b>🎞 استودیو اسلاید <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۵</small></b>
+<b>🎞 استودیو اسلاید <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۷</small></b>
 <a class="btn" href="board.html">🧑‍🏫 تخته تدریس</a>
 <label class="btn">📂 ورود PPTX / PDF<input id="imp" type="file" accept=".pptx,.ppsx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation" hidden></label>
 <button id="tl_" class="p">🧰 ابزارها</button>
@@ -69,10 +69,28 @@ video{width:100%;border-radius:12px;margin-top:8px}
 <label>فونت<select id="f"></select></label>
 </div>
 <label>انیمیشن اسلاید<select id="an"><option value="none">بدون</option><option value="fade">محو شدن</option><option value="rise">بالا آمدن</option><option value="zoom">بزرگ شدن</option><option value="slide">ورود از کنار</option><option value="bounce">پرش فنری</option><option value="flip">چرخش (ورق خوردن)</option><option value="type">تایپ حرف‌به‌حرف (متن)</option><option value="lines">خط به خط (متن)</option></select></label>
+<label>مدت انیمیشن: <span id="adv">0.8</span> ثانیه<input id="ad" type="range" min="0.2" max="6" step="0.1" value="0.8"></label>
+<label>تأخیر شروع: <span id="aev">0</span> ثانیه<input id="ae" type="range" min="0" max="5" step="0.1" value="0"></label>
 <div style="display:flex;gap:6px"><button id="anp" type="button">▶ پیش‌نمایش</button><button id="ana" type="button">اعمال روی همه</button></div>
 <label>اندازه فونت: <span id="sv"></span><input id="s" type="range" min="20" max="60"></label>
 <label id="dl_"><span id="dh"></span><textarea id="d"></textarea></label>
 <label id="cl_">نوع نمودار<select id="c"><option value="bar">ستونی</option><option value="line">خطی</option><option value="pie">دایره‌ای</option></select></label>
+<div id="ovs" style="display:none;border:1px dashed var(--line,#8886);border-radius:10px;padding:8px;margin:6px 0">
+<b>✏️ متن روی تصویر</b>
+<div id="ovlst" style="display:flex;gap:4px;flex-wrap:wrap;margin:6px 0"></div>
+<button id="ova" type="button">➕ متن جدید</button>
+<div id="ove" style="display:none">
+<label>متن<textarea id="ot" rows="3"></textarea></label>
+<label>جای افقی (X)<input id="ox" type="range" min="0" max="1200"></label>
+<label>جای عمودی (Y)<input id="oy" type="range" min="0" max="700"></label>
+<label>عرض کادر<input id="ow" type="range" min="200" max="1240"></label>
+<label>اندازه متن: <span id="osv"></span><input id="osz" type="range" min="16" max="100"></label>
+<div style="display:flex;gap:8px;align-items:center"><label>رنگ متن <input id="oc" type="color"></label><label>رنگ پس‌زمینه <input id="obc" type="color"></label><label><input id="ob" type="checkbox"> پس‌زمینه</label></div>
+<label>انیمیشن این متن<select id="oan"><option value="none">بدون</option><option value="fade">محو شدن</option><option value="rise">بالا آمدن</option><option value="zoom">بزرگ شدن</option><option value="slide">ورود از کنار</option><option value="bounce">پرش فنری</option><option value="flip">چرخش</option><option value="type">تایپ حرف‌به‌حرف</option><option value="lines">خط به خط</option></select></label>
+<label>مدت: <span id="oadv"></span> ثانیه<input id="oad" type="range" min="0.2" max="6" step="0.1"></label>
+<label>تأخیر: <span id="oaev"></span> ثانیه<input id="oae" type="range" min="0" max="8" step="0.1"></label>
+<button id="odl" type="button">🗑 حذف این متن</button>
+</div></div>
 <div class="row"><button id="add" class="p">+ اسلاید</button><button id="dup">کپی</button><button id="up">↑</button><button id="dn">↓</button><button id="del">حذف</button></div>
 <div class="row"><button id="undo">↩ برگردان</button><button id="dall">🗑 حذف کل ارائه</button></div>
 </section>
@@ -85,7 +103,7 @@ const P={light:{bg:'#f6efe2',card:'#fffaf0',ink:'#4a3222',acc:'#8b5a2b',line:'#d
 const C=['#8b5a2b','#c89560','#a0522d','#d2b48c','#6b4226','#deb887'];
 const Q={l:{w:854,h:480,b:700000,fps:15},m:{w:1280,h:720,b:1800000,fps:20},h:{w:1920,h:1080,b:3800000,fps:24}};
 const mk=(t,b)=>({im:[],t:t||'',b:b||'',k:'text',f:'Vazirmatn',s:34,d:'',c:'bar'});
-let D,i=0,dirty=true,Rc=null,ch=[],tmr,last=null,dp;
+var OI=0;let D,i=0,dirty=true,Rc=null,ch=[],tmr,last=null,dp;
 let th=(()=>{try{return localStorage.getItem('th')}catch(e){}})()||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
 try{D=JSON.parse(localStorage.getItem('deck1'))}catch(e){}
 if(!Array.isArray(D)||!D.length)D=[mk('عنوان ارائه','متن اسلاید را اینجا بنویس')];
@@ -161,35 +179,47 @@ function chart(y0,Z,p){
   X.textBaseline='top';X.fillText(rows[j][0].trim(),q[0],bot+8,w-6)});
  X.lineWidth=1}
 const ANI={i:-1,t0:0,busy:0,st:0};
-function aniP(Z,tot){const k=Z.an;if(!k||k=='none'||ANI.st)return null;
- if(ANI.i!==i){ANI.i=i;ANI.t0=performance.now()}
- const e=performance.now()-ANI.t0,p=Math.min(1,e/800),q=1-Math.pow(1-p,3);ANI.busy=e<tot+60;return{e,p,q}}
+function aniP(Z,tot){const k=Z.an;if(ANI.i!==i&&!ANI.st){ANI.i=i;ANI.t0=performance.now()}
+ if(!k||k=='none'||ANI.st)return null;
+ const d=(Z.ad||.8)*1000,e0=performance.now()-ANI.t0-(Z.ae||0)*1000,p=Math.min(1,Math.max(0,e0/d)),q=1-Math.pow(1-p,3);if(e0<tot+60)ANI.busy=1;return{e:Math.max(0,e0),p,q}}
 function aniOn(Z,a){const k=Z.an,q=a.q;X.globalAlpha=q;
  if(k=='rise')X.translate(0,(1-q)*70);else if(k=='zoom'){X.translate(640,360);X.scale(.8+.2*q,.8+.2*q);X.translate(-640,-360)}
  else if(k=='slide')X.translate((1-q)*-260,0)
  else if(k=='bounce'){const t=a.p,b=1+2.7*Math.pow(t-1,3)+1.7*Math.pow(t-1,2);X.globalAlpha=Math.min(1,t*3);X.translate(0,(1-b)*140)}
  else if(k=='flip'){X.translate(640,0);X.scale(Math.max(.02,q),1);X.translate(-640,0)}}
 $('an').onchange=e=>{cur().an=e.target.value;ANI.t0=performance.now();ANI.i=i;dirty=true;save()};
+$('ad').oninput=e=>{cur().ad=+e.target.value;$('adv').textContent=e.target.value;ANI.t0=performance.now();ANI.i=i;dirty=true;save()};
+$('ae').oninput=e=>{cur().ae=+e.target.value;$('aev').textContent=e.target.value;ANI.t0=performance.now();ANI.i=i;dirty=true;save()};
 $('anp').onclick=()=>{ANI.t0=performance.now();ANI.i=i;dirty=true};
-$('ana').onclick=()=>{const v=cur().an||'none';D.forEach(z=>z.an=v);ANI.t0=performance.now();dirty=true;save()};
+$('ana').onclick=()=>{const v=cur().an||'none';D.forEach(z=>{z.an=v;z.ad=cur().ad;z.ae=cur().ae});ANI.t0=performance.now();dirty=true;save()};
+function ovDraw(Z){const arr=Z.ov;if(!arr||!arr.length)return;arr.forEach(o=>{
+ const full=o.t||'',dd=(o.ad||.8)*1000,k=o.an,TYb=k=='type',LNb=k=='lines',pr=full.split('\n').filter(x=>x.trim()),
+  A=aniP(o,TYb?dd+300:LNb?pr.length*dd+300:dd),sz=o.s||34;let show=full;
+ if(A&&TYb)show=full.slice(0,Math.floor(A.e*full.length/dd));
+ else if(A&&LNb)show=pr.slice(0,Math.min(pr.length,Math.floor(A.e/dd)+1)).join('\n');
+ if(!show.trim())return;
+ X.save();if(A&&!TYb&&!LNb)aniOn(o,A);
+ XL=o.x;XW=o.w||600;X.save();X.globalAlpha=0;const ye=T(full,o.y,sz,'#000',false,Z);X.restore();
+ if(o.bg!==false){X.fillStyle=o.bc||'#000000b8';const pd=14;X.beginPath();(X.roundRect||X.rect).call(X,o.x-pd,o.y-pd,XW+2*pd,ye-o.y+2*pd-sz*.3,12);X.fill()}
+ T(show,o.y,sz,o.c||'#ffffff',true,Z);XL=80;XW=1120;X.restore()})}
 function draw(){
- const s=cv.width/1280,p=P[th],Z=cur();
+ ANI.busy=0;const s=cv.width/1280,p=P[th],Z=cur();
  X.setTransform(s,0,0,s,0,0);X.fillStyle=p.bg;X.fillRect(0,0,1280,720);
  if(window.VOD&&VOD()){window.ovl&&ovl();return}
- if(Z.k=='img'&&window.drawPg){const A=aniP(Z,900);if(A){X.save();aniOn(Z,A)}drawPg(Z);if(A)X.restore();window.ovl&&ovl();return}
+ if(Z.k=='img'&&window.drawPg){const A=aniP(Z,(Z.ad||.8)*1000);if(A){X.save();aniOn(Z,A)}drawPg(Z);if(A)X.restore();ovDraw(Z);window.ovl&&ovl();return}
  X.fillStyle=p.acc;X.fillRect(0,0,1280,14);
  XL=80;XW=1120;
- const TY=Z.an=='type'&&Z.k!='table'&&Z.k!='chart',LN=(Z.an=='lines'||TY)&&Z.k!='table'&&Z.k!='chart',pr=(Z.b||'').split('\n').filter(x=>x.trim()),A=aniP(Z,TY?(Z.b||'').length*35+500:LN?pr.length*900+400:900);
+ const TY=Z.an=='type'&&Z.k!='table'&&Z.k!='chart',LN=(Z.an=='lines'||TY)&&Z.k!='table'&&Z.k!='chart',pr=(Z.b||'').split('\n').filter(x=>x.trim()),dd=(Z.ad||.8)*1000,A=aniP(Z,TY?dd+500:LN?pr.length*dd+400:dd);
  if(A&&!LN){X.save();aniOn(Z,A)}
  let y=T(Z.t,50,Math.round(Z.s*1.35),p.acc,true,Z);
  X.fillStyle=p.line;X.fillRect(80,y,1120,4);y+=26;
  if(Z.k=='table')tbl(y,Z,p);else if(Z.k=='chart')chart(y,Z,p);
  else{const hi=Z.im&&Z.im.length,rt=R(Z.t+Z.b);XW=hi?600:1120;XL=hi&&rt?600:80;
-  if(A&&TY){T((Z.b||'').slice(0,Math.floor(A.e/35)),y,Z.s,p.ink,false,Z);XL=80;XW=1120;if(hi&&A.e>(Z.b||'').length*35){X.globalAlpha=Math.min(1,(A.e-(Z.b||'').length*35)/400);imgs(Z,rt,y);X.globalAlpha=1}}
-  else if(A&&LN){const n=Math.min(pr.length,Math.floor(A.e/900)+1),fr=Math.min(1,(A.e-(n-1)*900)/500);let yy=y;
+  if(A&&TY){T((Z.b||'').slice(0,Math.floor(A.e*(Z.b||'').length/dd)),y,Z.s,p.ink,false,Z);XL=80;XW=1120;if(hi&&A.e>dd){X.globalAlpha=Math.min(1,(A.e-dd)/400);imgs(Z,rt,y);X.globalAlpha=1}}
+  else if(A&&LN){const n=Math.min(pr.length,Math.floor(A.e/dd)+1),fr=Math.min(1,(A.e-(n-1)*dd)/Math.min(500,dd));let yy=y;
    if(n>1)yy=T(pr.slice(0,n-1).join('\n'),y,Z.s,p.ink,false,Z);
    X.globalAlpha=fr;T(pr[n-1],yy,Z.s,p.ink,false,Z);X.globalAlpha=1;
-   XL=80;XW=1120;if(hi&&n>=pr.length){X.globalAlpha=Math.min(1,Math.max(0,(A.e-pr.length*900)/400));imgs(Z,rt,y);X.globalAlpha=1}}
+   XL=80;XW=1120;if(hi&&n>=pr.length){X.globalAlpha=Math.min(1,Math.max(0,(A.e-pr.length*dd)/400));imgs(Z,rt,y);X.globalAlpha=1}}
   else{T(Z.b,y,Z.s,p.ink,false,Z);XL=80;XW=1120;if(hi)imgs(Z,rt,y)}}
  if(A&&!LN)X.restore();
  X.font='20px Tahoma,sans-serif';X.fillStyle=p.line;X.direction='ltr';X.textAlign='left';X.textBaseline='top';
@@ -198,8 +228,21 @@ function draw(){
 
 function save(){try{localStorage.setItem('deck1',JSON.stringify(D))}catch(e){try{localStorage.setItem('deck1',JSON.stringify(D.map(z=>({...z,im:[]}))))}catch(e2){}}}
 function thumbs(){const e=$('th');e.innerHTML='';D.forEach((z,j)=>{const b=document.createElement('button');b.textContent=(j+1)+'. '+(z.t||'بدون عنوان');if(j==i)b.className='on';b.onclick=()=>{i=j;ui()};e.append(b)});$('no').textContent=(i+1)+' / '+D.length}
-function vis(){const k=cur().k;$('k').querySelector('option[value=img]').hidden=!cur().pg;$('ir').style.display=k=='text'?'':'none';$('dl_').style.display=(k=='text'||k=='img')?'none':'';$('cl_').style.display=k=='chart'?'':'none';$('dh').textContent=k=='table'?'جدول: هر خط یک ردیف، ستون‌ها با کاما':'نمودار: هر خط «برچسب,عدد»';$('sv').textContent=cur().s}
-function ui(){['t','b','k','f','s','d','c'].forEach(id=>$(id).value=cur()[id]);$('an').value=cur().an||'none';vis();thumbs();dirty=true;save()}
+function ovUI(){const Z=cur(),on=Z.k=='img';$('ovs').style.display=on?'':'none';if(!on)return;Z.ov=Z.ov||[];if(OI>=Z.ov.length)OI=Z.ov.length-1;
+ $('ovlst').innerHTML='';Z.ov.forEach((o,j)=>{const b=document.createElement('button');b.type='button';b.textContent=(j+1)+'. '+((o.t||'').slice(0,12)||'خالی');if(j==OI)b.className='on';b.onclick=()=>{OI=j;ovUI()};$('ovlst').append(b)});
+ const o=Z.ov[OI];$('ove').style.display=o?'':'none';if(!o)return;
+ $('ot').value=o.t||'';$('ox').value=o.x;$('oy').value=o.y;$('ow').value=o.w||600;$('osz').value=o.s||34;$('osv').textContent=o.s||34;$('oc').value=o.c||'#ffffff';$('obc').value=(o.bc||'#000000b8').slice(0,7);$('ob').checked=o.bg!==false;$('oan').value=o.an||'none';$('oad').value=o.ad||.8;$('oadv').textContent=o.ad||.8;$('oae').value=o.ae||0;$('oaev').textContent=o.ae||0}
+function ovSet(f){return e=>{const o=cur().ov[OI];if(!o)return;f(o,e.target);ANI.t0=performance.now();ANI.i=i;dirty=true;save()}}
+$('ova').onclick=()=>{const Z=cur();Z.ov=Z.ov||[];Z.ov.push({t:'متن جدید',x:140,y:80+Z.ov.length*90,w:700,s:40,c:'#ffffff',bg:true,an:'fade',ad:.8,ae:0});OI=Z.ov.length-1;ovUI();dirty=true;save()};
+$('odl').onclick=()=>{const Z=cur();Z.ov.splice(OI,1);OI=0;ovUI();dirty=true;save()};
+$('ot').oninput=ovSet((o,t)=>{o.t=t.value;});
+$('ox').oninput=ovSet((o,t)=>{o.x=+t.value});$('oy').oninput=ovSet((o,t)=>{o.y=+t.value});$('ow').oninput=ovSet((o,t)=>{o.w=+t.value});
+$('osz').oninput=ovSet((o,t)=>{o.s=+t.value;$('osv').textContent=t.value});
+$('oc').oninput=ovSet((o,t)=>{o.c=t.value});$('obc').oninput=ovSet((o,t)=>{o.bc=t.value+'b8'});$('ob').onchange=ovSet((o,t)=>{o.bg=t.checked});
+$('oan').onchange=ovSet((o,t)=>{o.an=t.value});
+$('oad').oninput=ovSet((o,t)=>{o.ad=+t.value;$('oadv').textContent=t.value});$('oae').oninput=ovSet((o,t)=>{o.ae=+t.value;$('oaev').textContent=t.value});
+function vis(){ovUI();const k=cur().k;$('k').querySelector('option[value=img]').hidden=!cur().pg;$('ir').style.display=k=='text'?'':'none';$('dl_').style.display=(k=='text'||k=='img')?'none':'';$('cl_').style.display=k=='chart'?'':'none';$('dh').textContent=k=='table'?'جدول: هر خط یک ردیف، ستون‌ها با کاما':'نمودار: هر خط «برچسب,عدد»';$('sv').textContent=cur().s}
+function ui(){['t','b','k','f','s','d','c'].forEach(id=>$(id).value=cur()[id]);$('an').value=cur().an||'none';$('ad').value=cur().ad||.8;$('adv').textContent=cur().ad||.8;$('ae').value=cur().ae||0;$('aev').textContent=cur().ae||0;vis();thumbs();dirty=true;save()}
 ['t','b','k','f','s','d','c'].forEach(id=>$(id).oninput=()=>{
  const Z=cur();Z[id]=id=='s'?+$(id).value:$(id).value;
  if(id=='k'&&!Z.d)Z.d=Z.k=='table'?'نام,مقدار\nالف,10\nب,20':'الف,10\nب,25\nج,15';
