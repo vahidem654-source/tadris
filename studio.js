@@ -587,7 +587,7 @@ async function exportPptx(){
       body+=pic(bl,/png/i.test(bl.type)?'png':'jpeg',(ix+(iw-w)/2)*E,(y0+a*(bh+gap)+(bh-h)/2)*E,w*E,h*E)}}
     if(Z.cr)body+=tbox(80,690,1120,24,para('Image: '+Z.cr,9,'#777777',false,0,'Tahoma'),'ctr');
    }else{
-    i=k;dirty=true;size();draw();var jb=await new Promise(function(r){cv.toBlob(r,'image/jpeg',.9)});body+=pic(jb,'jpeg',0,0,SW,SH)}
+    i=k;dirty=true;size();ANI.st=1;draw();ANI.st=0;var jb=await new Promise(function(r){cv.toBlob(r,'image/jpeg',.9)});body+=pic(jb,'jpeg',0,0,SW,SH)}
    z.file('ppt/slides/slide'+(k+1)+'.xml',H+'<p:sld '+ns+'><p:cSld>'+bg+'<p:spTree>'+grp+body+'</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>');
    z.file('ppt/slides/_rels/slide'+(k+1)+'.xml.rels',rel(relx))}
   i=keepI;ui();
