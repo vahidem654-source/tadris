@@ -25,15 +25,19 @@ button,.btn,select,input,textarea{font:inherit;color:var(--ink);background:var(-
 button,.btn{cursor:pointer;text-decoration:none;display:inline-block}
 button.p,.btn.p{background:var(--acc);color:var(--bg);border-color:var(--acc)}
 button.r{background:#a63c2a;color:#fff;border-color:#a63c2a}
-main{display:grid;grid-template-columns:150px 1fr 320px;gap:12px;padding:12px;max-width:1500px;margin:auto}
+main{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:12px;max-width:1500px;margin:auto}
 #th{display:flex;flex-direction:column;gap:6px}
 #th button{text-align:start;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 #th button.on{background:var(--acc);color:var(--bg)}
 canvas{width:100%;aspect-ratio:16/9;border:1px solid var(--line);border-radius:12px;display:block}
 .bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
-#ed{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;align-self:start}
+#ed{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;margin-bottom:10px}
+#edt{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}#edt button.on{background:var(--acc);color:var(--bg)}
+.g{display:none;flex-wrap:wrap;gap:8px;align-items:flex-end;max-height:290px;overflow-y:auto}.g.on{display:flex}
+.g>label{flex:1 1 150px;min-width:130px}
+#ovs,#ove{flex-wrap:wrap;gap:8px;align-items:flex-end}#ovs{display:flex}#ove{display:flex}#ove>label{flex:1 1 150px;min-width:130px}#ovs>b,#ovs>#ovlst{flex:0 0 auto}.g>#ovs{flex:1 1 100%}
 #ed label{font-size:13px;opacity:.85;display:flex;flex-direction:column;gap:3px}
-#ed textarea{min-height:90px;resize:vertical}
+#ed textarea{min-height:52px;resize:vertical}
 .row{display:flex;gap:6px;flex-wrap:wrap}
 video{width:100%;border-radius:12px;margin-top:8px}
 @media(max-width:900px){main{grid-template-columns:1fr}#th{flex-direction:row;overflow-x:auto}#th button{min-width:110px}}
@@ -41,7 +45,7 @@ video{width:100%;border-radius:12px;margin-top:8px}
 </head>
 <body>
 <header>
-<b>🎞 استودیو اسلاید <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۷</small></b>
+<b>🎞 استودیو اسلاید <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۸</small></b>
 <a class="btn" href="board.html">🧑‍🏫 تخته تدریس</a>
 <label class="btn">📂 ورود PPTX / PDF<input id="imp" type="file" accept=".pptx,.ppsx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation" hidden></label>
 <button id="tl_" class="p">🧰 ابزارها</button>
@@ -51,30 +55,25 @@ video{width:100%;border-radius:12px;margin-top:8px}
 <main>
 <div id="th"></div>
 <section>
-<canvas id="cv" width="1280" height="720"></canvas>
-<div class="bar">
-<button id="pv">◀ قبلی</button><span id="no"></span><button id="nx">بعدی ▶</button>
-<select id="q"><option value="l">کیفیت: کم‌حجم (480p)</option><option value="m" selected>کیفیت: متوسط (720p)</option><option value="h">کیفیت: بالا (1080p)</option></select>
-<button id="rec" class="p">● شروع ضبط</button><button id="ps2" hidden>⏸ مکث</button><button id="as">🎙 صدا</button><span id="tm"></span>
-</div>
-<div class="bar" id="tl"></div>
-<div id="out"></div>
-</section>
 <section id="ed">
-<label>عنوان<input id="t"></label>
+<div id="edt"><button data-g="g1" class="on">📝 محتوا</button><button data-g="g2">🎬 انیمیشن</button><button data-g="g3">✏️ متن روی تصویر</button><button data-g="g4">🗂 اسلاید</button></div>
+<div class="g on" id="g1"><label>عنوان<input id="t"></label>
 <label>متن<textarea id="b"></textarea></label>
 <div class="row" id="ir"><label class="btn">🖼 افزودن تصویر<input id="ai" type="file" accept="image/*" multiple hidden></label><button id="ci">حذف تصاویر</button></div>
 <div class="row">
 <label>نوع اسلاید<select id="k"><option value="text">متن</option><option value="table">جدول</option><option value="chart">نمودار</option><option value="img" hidden>تصویر کامل صفحه</option></select></label>
 <label>فونت<select id="f"></select></label>
 </div>
-<label>انیمیشن اسلاید<select id="an"><option value="none">بدون</option><option value="fade">محو شدن</option><option value="rise">بالا آمدن</option><option value="zoom">بزرگ شدن</option><option value="slide">ورود از کنار</option><option value="bounce">پرش فنری</option><option value="flip">چرخش (ورق خوردن)</option><option value="type">تایپ حرف‌به‌حرف (متن)</option><option value="lines">خط به خط (متن)</option></select></label>
-<label>مدت انیمیشن: <span id="adv">0.8</span> ثانیه<input id="ad" type="range" min="0.2" max="6" step="0.1" value="0.8"></label>
-<label>تأخیر شروع: <span id="aev">0</span> ثانیه<input id="ae" type="range" min="0" max="5" step="0.1" value="0"></label>
-<div style="display:flex;gap:6px"><button id="anp" type="button">▶ پیش‌نمایش</button><button id="ana" type="button">اعمال روی همه</button></div>
 <label>اندازه فونت: <span id="sv"></span><input id="s" type="range" min="20" max="60"></label>
 <label id="dl_"><span id="dh"></span><textarea id="d"></textarea></label>
 <label id="cl_">نوع نمودار<select id="c"><option value="bar">ستونی</option><option value="line">خطی</option><option value="pie">دایره‌ای</option></select></label>
+</div>
+<div class="g" id="g2"><label>انیمیشن اسلاید<select id="an"><option value="none">بدون</option><option value="fade">محو شدن</option><option value="rise">بالا آمدن</option><option value="zoom">بزرگ شدن</option><option value="slide">ورود از کنار</option><option value="bounce">پرش فنری</option><option value="flip">چرخش (ورق خوردن)</option><option value="type">تایپ حرف‌به‌حرف (متن)</option><option value="lines">خط به خط (متن)</option></select></label>
+<label>مدت انیمیشن: <span id="adv">0.8</span> ثانیه<input id="ad" type="range" min="0.2" max="6" step="0.1" value="0.8"></label>
+<label>تأخیر شروع: <span id="aev">0</span> ثانیه<input id="ae" type="range" min="0" max="5" step="0.1" value="0"></label>
+<div style="display:flex;gap:6px"><button id="anp" type="button">▶ پیش‌نمایش</button><button id="ana" type="button">اعمال روی همه</button></div>
+</div>
+<div class="g" id="g3"><div id="ovn" style="opacity:.8">برای متن روی تصویر، «نوع اسلاید» را روی «تصویر کامل صفحه» بگذار (اسلایدهای واردشده از PDF/پاورپوینت).</div>
 <div id="ovs" style="display:none;border:1px dashed var(--line,#8886);border-radius:10px;padding:8px;margin:6px 0">
 <b>✏️ متن روی تصویر</b>
 <div id="ovlst" style="display:flex;gap:4px;flex-wrap:wrap;margin:6px 0"></div>
@@ -91,13 +90,26 @@ video{width:100%;border-radius:12px;margin-top:8px}
 <label>تأخیر: <span id="oaev"></span> ثانیه<input id="oae" type="range" min="0" max="8" step="0.1"></label>
 <button id="odl" type="button">🗑 حذف این متن</button>
 </div></div>
-<div class="row"><button id="add" class="p">+ اسلاید</button><button id="dup">کپی</button><button id="up">↑</button><button id="dn">↓</button><button id="del">حذف</button></div>
+</div>
+<div class="g" id="g4"><div class="row"><button id="add" class="p">+ اسلاید</button><button id="dup">کپی</button><button id="up">↑</button><button id="dn">↓</button><button id="del">حذف</button></div>
 <div class="row"><button id="undo">↩ برگردان</button><button id="dall">🗑 حذف کل ارائه</button></div>
+</div>
 </section>
+<canvas id="cv" width="1280" height="720"></canvas>
+<div class="bar">
+<button id="pv">◀ قبلی</button><span id="no"></span><button id="nx">بعدی ▶</button>
+<select id="q"><option value="l">کیفیت: کم‌حجم (480p)</option><option value="m" selected>کیفیت: متوسط (720p)</option><option value="h">کیفیت: بالا (1080p)</option></select>
+<button id="rec" class="p">● شروع ضبط</button><button id="ps2" hidden>⏸ مکث</button><button id="as">🎙 صدا</button><span id="tm"></span>
+</div>
+<div class="bar" id="tl"></div>
+<div id="out"></div>
+</section>
+
 </main>
 <script src="jszip.min.js"></script><script>if(typeof JSZip=="undefined"){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>')}</script><script src="pptx.js"></script>
 <script>
 const $=id=>document.getElementById(id);
+document.querySelectorAll('#edt button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#edt button,.g').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.getElementById(b.dataset.g).classList.add('on')});
 const FONTS=['Vazirmatn','B Nazanin','Noto Naskh Arabic','Tahoma','Georgia','Arial','Courier New'];
 const P={light:{bg:'#f6efe2',card:'#fffaf0',ink:'#4a3222',acc:'#8b5a2b',line:'#dccfb8'},dark:{bg:'#241a14',card:'#32251c',ink:'#f1e6d3',acc:'#c89560',line:'#5a4636'}};
 const C=['#8b5a2b','#c89560','#a0522d','#d2b48c','#6b4226','#deb887'];
@@ -228,7 +240,7 @@ function draw(){
 
 function save(){try{localStorage.setItem('deck1',JSON.stringify(D))}catch(e){try{localStorage.setItem('deck1',JSON.stringify(D.map(z=>({...z,im:[]}))))}catch(e2){}}}
 function thumbs(){const e=$('th');e.innerHTML='';D.forEach((z,j)=>{const b=document.createElement('button');b.textContent=(j+1)+'. '+(z.t||'بدون عنوان');if(j==i)b.className='on';b.onclick=()=>{i=j;ui()};e.append(b)});$('no').textContent=(i+1)+' / '+D.length}
-function ovUI(){const Z=cur(),on=Z.k=='img';$('ovs').style.display=on?'':'none';if(!on)return;Z.ov=Z.ov||[];if(OI>=Z.ov.length)OI=Z.ov.length-1;
+function ovUI(){const Z=cur(),on=Z.k=='img';$('ovs').style.display=on?'':'none';$('ovn').style.display=on?'none':'';if(!on)return;Z.ov=Z.ov||[];if(OI>=Z.ov.length)OI=Z.ov.length-1;
  $('ovlst').innerHTML='';Z.ov.forEach((o,j)=>{const b=document.createElement('button');b.type='button';b.textContent=(j+1)+'. '+((o.t||'').slice(0,12)||'خالی');if(j==OI)b.className='on';b.onclick=()=>{OI=j;ovUI()};$('ovlst').append(b)});
  const o=Z.ov[OI];$('ove').style.display=o?'':'none';if(!o)return;
  $('ot').value=o.t||'';$('ox').value=o.x;$('oy').value=o.y;$('ow').value=o.w||600;$('osz').value=o.s||34;$('osv').textContent=o.s||34;$('oc').value=o.c||'#ffffff';$('obc').value=(o.bc||'#000000b8').slice(0,7);$('ob').checked=o.bg!==false;$('oan').value=o.an||'none';$('oad').value=o.ad||.8;$('oadv').textContent=o.ad||.8;$('oae').value=o.ae||0;$('oaev').textContent=o.ae||0}
