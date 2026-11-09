@@ -41,7 +41,7 @@ video{width:100%;border-radius:12px;margin-top:8px}
 </head>
 <body>
 <header>
-<b>🎞 استودیو اسلاید <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۳</small></b>
+<b>🎞 استودیو اسلاید <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۵</small></b>
 <a class="btn" href="board.html">🧑‍🏫 تخته تدریس</a>
 <label class="btn">📂 ورود PPTX / PDF<input id="imp" type="file" accept=".pptx,.ppsx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation" hidden></label>
 <button id="tl_" class="p">🧰 ابزارها</button>
@@ -74,6 +74,7 @@ video{width:100%;border-radius:12px;margin-top:8px}
 <label id="dl_"><span id="dh"></span><textarea id="d"></textarea></label>
 <label id="cl_">نوع نمودار<select id="c"><option value="bar">ستونی</option><option value="line">خطی</option><option value="pie">دایره‌ای</option></select></label>
 <div class="row"><button id="add" class="p">+ اسلاید</button><button id="dup">کپی</button><button id="up">↑</button><button id="dn">↓</button><button id="del">حذف</button></div>
+<div class="row"><button id="undo">↩ برگردان</button><button id="dall">🗑 حذف کل ارائه</button></div>
 </section>
 </main>
 <script src="jszip.min.js"></script><script>if(typeof JSZip=="undefined"){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>')}</script><script src="pptx.js"></script>
@@ -160,7 +161,7 @@ function chart(y0,Z,p){
   X.textBaseline='top';X.fillText(rows[j][0].trim(),q[0],bot+8,w-6)});
  X.lineWidth=1}
 const ANI={i:-1,t0:0,busy:0,st:0};
-function aniP(Z,tot){const k=Z.an;if(!k||k=='none'||ANI.st||Z.k=='img')return null;
+function aniP(Z,tot){const k=Z.an;if(!k||k=='none'||ANI.st)return null;
  if(ANI.i!==i){ANI.i=i;ANI.t0=performance.now()}
  const e=performance.now()-ANI.t0,p=Math.min(1,e/800),q=1-Math.pow(1-p,3);ANI.busy=e<tot+60;return{e,p,q}}
 function aniOn(Z,a){const k=Z.an,q=a.q;X.globalAlpha=q;
@@ -175,7 +176,7 @@ function draw(){
  const s=cv.width/1280,p=P[th],Z=cur();
  X.setTransform(s,0,0,s,0,0);X.fillStyle=p.bg;X.fillRect(0,0,1280,720);
  if(window.VOD&&VOD()){window.ovl&&ovl();return}
- if(Z.k=='img'&&window.drawPg){drawPg(Z);window.ovl&&ovl();return}
+ if(Z.k=='img'&&window.drawPg){const A=aniP(Z,900);if(A){X.save();aniOn(Z,A)}drawPg(Z);if(A)X.restore();window.ovl&&ovl();return}
  X.fillStyle=p.acc;X.fillRect(0,0,1280,14);
  XL=80;XW=1120;
  const TY=Z.an=='type'&&Z.k!='table'&&Z.k!='chart',LN=(Z.an=='lines'||TY)&&Z.k!='table'&&Z.k!='chart',pr=(Z.b||'').split('\n').filter(x=>x.trim()),A=aniP(Z,TY?(Z.b||'').length*35+500:LN?pr.length*900+400:900);
@@ -197,20 +198,24 @@ function draw(){
 
 function save(){try{localStorage.setItem('deck1',JSON.stringify(D))}catch(e){try{localStorage.setItem('deck1',JSON.stringify(D.map(z=>({...z,im:[]}))))}catch(e2){}}}
 function thumbs(){const e=$('th');e.innerHTML='';D.forEach((z,j)=>{const b=document.createElement('button');b.textContent=(j+1)+'. '+(z.t||'بدون عنوان');if(j==i)b.className='on';b.onclick=()=>{i=j;ui()};e.append(b)});$('no').textContent=(i+1)+' / '+D.length}
-function vis(){const k=cur().k;$('ir').style.display=k=='text'?'':'none';$('dl_').style.display=(k=='text'||k=='img')?'none':'';$('cl_').style.display=k=='chart'?'':'none';$('dh').textContent=k=='table'?'جدول: هر خط یک ردیف، ستون‌ها با کاما':'نمودار: هر خط «برچسب,عدد»';$('sv').textContent=cur().s}
+function vis(){const k=cur().k;$('k').querySelector('option[value=img]').hidden=!cur().pg;$('ir').style.display=k=='text'?'':'none';$('dl_').style.display=(k=='text'||k=='img')?'none':'';$('cl_').style.display=k=='chart'?'':'none';$('dh').textContent=k=='table'?'جدول: هر خط یک ردیف، ستون‌ها با کاما':'نمودار: هر خط «برچسب,عدد»';$('sv').textContent=cur().s}
 function ui(){['t','b','k','f','s','d','c'].forEach(id=>$(id).value=cur()[id]);$('an').value=cur().an||'none';vis();thumbs();dirty=true;save()}
 ['t','b','k','f','s','d','c'].forEach(id=>$(id).oninput=()=>{
  const Z=cur();Z[id]=id=='s'?+$(id).value:$(id).value;
  if(id=='k'&&!Z.d)Z.d=Z.k=='table'?'نام,مقدار\nالف,10\nب,20':'الف,10\nب,25\nج,15';
  if(id=='k')$('d').value=Z.d;
+ if(id=='k'&&Z.k=='text'&&Z.pg&&!(Z.b||'').trim()){Z.b=Z.txt||'';$('b').value=Z.b}
  vis();thumbs();dirty=true;save()});
 $('ai').onchange=async e=>{const Z=cur();Z.im=Z.im||[];for(const f of e.target.files){const u=await fit(f,/png/i.test(f.type));if(u)Z.im.push({u})}e.target.value='';ui()};
 $('ci').onclick=()=>{cur().im=[];ui()};
-$('add').onclick=()=>{D.splice(i+1,0,mk('عنوان جدید',''));i++;ui()};
-$('dup').onclick=()=>{D.splice(i+1,0,{...cur()});i++;ui()};
-$('del').onclick=()=>{if(D.length>1){D.splice(i,1);i=Math.min(i,D.length-1);ui()}};
-$('up').onclick=()=>{if(i>0){[D[i-1],D[i]]=[D[i],D[i-1]];i--;ui()}};
-$('dn').onclick=()=>{if(i<D.length-1){[D[i+1],D[i]]=[D[i],D[i+1]];i++;ui()}};
+const UH=[];window.snap=()=>{UH.push({D:D.slice(),i});if(UH.length>15)UH.shift()};
+$('add').onclick=()=>{snap();D.splice(i+1,0,mk('عنوان جدید',''));i++;ui()};
+$('dup').onclick=()=>{snap();D.splice(i+1,0,{...cur()});i++;ui()};
+$('del').onclick=()=>{if(D.length>1){snap();D.splice(i,1);i=Math.min(i,D.length-1);ui()}};
+$('up').onclick=()=>{if(i>0){snap();[D[i-1],D[i]]=[D[i],D[i-1]];i--;ui()}};
+$('dall').onclick=()=>{if(!confirm('کل ارائه ('+D.length+' اسلاید) حذف شود؟ با دکمه‌ی ↩ برگردان می‌توانی پس بگیری.'))return;snap();D=[mk('عنوان ارائه','')];i=0;ui();toast('کل ارائه حذف شد؛ برای پس‌گرفتن ↩ برگردان را بزن')};
+$('undo').onclick=()=>{const u=UH.pop();if(!u){toast('چیزی برای برگرداندن نیست');return}D=u.D;i=Math.min(u.i,D.length-1);ui();toast('برگشت')};
+$('dn').onclick=()=>{if(i<D.length-1){snap();[D[i+1],D[i]]=[D[i],D[i+1]];i++;ui()}};
 const go=n=>{if(n>=0&&n<D.length){i=n;ui()}};
 $('nx').onclick=()=>go(i+1);$('pv').onclick=()=>go(i-1);
 addEventListener('keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if(e.key=='ArrowLeft'||e.key==' ')go(i+1);if(e.key=='ArrowRight')go(i-1)});
@@ -226,7 +231,7 @@ window.impEdit=async f=>{
    const x=new DOMParser().parseFromString(await z.file(k).async('string'),'application/xml');
    const ps=[...x.getElementsByTagName('a:p')].map(p=>[...p.getElementsByTagName('a:t')].map(t=>t.textContent).join('')).filter(Boolean);
    const m=mk(ps[0],ps.slice(1).join('\n'));m.im=await slideImgs(z,k,x);out.push(m)}
-  if(!out.length)throw 0;D=out;i=0;ui()
+  if(!out.length)throw 0;snap();D=out;i=0;ui()
  }catch(err){alert('خواندن فایل ممکن نشد. فقط فایل .pptx پشتیبانی می‌شود و فقط متن اسلایدها وارد می‌شود.')}};
 $('imp').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(window.importFile)importFile(f);else impEdit(f)};
 

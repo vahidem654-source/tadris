@@ -21,7 +21,7 @@ var st=document.createElement('style');st.textContent=
 '#tl button.on{background:var(--acc);color:var(--bg)}#cdn{position:fixed;inset:0;display:none;align-items:center;justify-content:center;font-size:120px;color:#fff;background:#0007;z-index:60}';
 document.head.appendChild(st);
 var tsEl=document.createElement('div');tsEl.id='ts2';document.body.appendChild(tsEl);
-function toast(t,ms){tsEl.textContent=t;tsEl.style.opacity=1;clearTimeout(tsEl.t);tsEl.t=setTimeout(function(){tsEl.style.opacity=0},ms||2800)}
+window.toast=toast;function toast(t,ms){tsEl.textContent=t;tsEl.style.opacity=1;clearTimeout(tsEl.t);tsEl.t=setTimeout(function(){tsEl.style.opacity=0},ms||2800)}
 function modal(html,wide){var o=document.createElement('div');o.className='ov';o.innerHTML='<div class="pn'+(wide?' w':'')+'">'+html+'</div>';document.body.appendChild(o);return o}
 function busy(t){var o=q$('#bzz');if(!t){if(o)o.remove();return}if(!o){o=modal('<div style="text-align:center" id="bzt"></div>');o.id='bzz'}q$('#bzt',o).textContent=t}
 function saveBlob(bl,name){var u=URL.createObjectURL(bl);
@@ -116,7 +116,7 @@ async function importImages(f){
    var txt='';try{txt=(await s.text(k)).trim()}catch(e){}
    var z=mk((txt.split('\n')[0]||'').slice(0,60)||('صفحه '+fa(k+1)),'');z.k='img';z.pg=c.toDataURL('image/jpeg',.86);z.txt=txt;out.push(z)}
   if(!out.length)throw new Error('صفحه‌ای خوانده نشد');
-  D=out;i=0;ui();busy();toast('وارد شد: '+fa(out.length)+' صفحه — با دکمه‌ی ● ضبط کن')
+  window.snap&&snap();D=out;i=0;ui();busy();toast('وارد شد: '+fa(out.length)+' صفحه — با دکمه‌ی ● ضبط کن')
  }catch(e){busy();alert('ورود فایل ممکن نشد: '+(e.message||e))}}
 
 /* ============ لایه‌ی روی بوم: قلم، لمس، لیزر، اعتبار تصویر، محو شدن اسلاید ============ */
@@ -435,7 +435,7 @@ async function imgDlg(){
   var Z=cur();if(Z.k==='img'){toast('این اسلاید تصویر کامل صفحه است؛ از «هر تصویر یک اسلاید جدید» استفاده کن');return}
   Z.im=Z.im||[];for(var a=0;a<ids.length;a++){var b=list[ids[a]].blob,u=await fit(b,/png/i.test(b.type));if(u)Z.im.push({u:u})}stop=true;o.remove();ui();toast('تصویر روی اسلاید گذاشته شد')};
  s('#gN').onclick=async function(){var ids=Object.keys(sel).map(Number);if(!ids.length){toast('اول یک یا چند تصویر را انتخاب کن');return}
-  for(var a=0;a<ids.length;a++){var b=list[ids[a]].blob,u=await fit(b,/png/i.test(b.type));if(u){var z=mk('تصویر '+fa(a+1),'');z.im=[{u:u}];D.splice(i+1,0,z);i++}}stop=true;o.remove();ui();toast('اسلاید تازه ساخته شد')};
+  for(var a=0;a<ids.length;a++){var b=list[ids[a]].blob,u=await fit(b,/png/i.test(b.type));if(u){if(!a&&window.snap)snap();var z=mk('تصویر '+fa(a+1),'');z.im=[{u:u}];D.splice(i+1,0,z);i++}}stop=true;o.remove();ui();toast('اسلاید تازه ساخته شد')};
  if(LASTFILE)load(LASTFILE);else s('#gs2').textContent='یک فایل انتخاب کن.'}
 
 /* ============ ویزارد: ارائه‌ی تازه با تصویرهای مرتبط ============ */
@@ -543,7 +543,7 @@ function wizReview(o,slides,opt){
     if(bl){var u=await fit(bl,/png/i.test(bl.type));if(u)z.im=[{u:u}]}}
    catch(e){console.error(e);fail++}
    out.push(z)}
-  DBAK={D:D,i:i};D=out;i=0;o.remove();ui();toast(fail?'ارائه ساخته شد؛ '+fa(fail)+' عکس دانلود نشد':'ارائه ساخته شد؛ برای برگشت به قبلی: 🧰 ← ↩')}}
+  window.snap&&snap();DBAK={D:D,i:i};D=out;i=0;o.remove();ui();toast(fail?'ارائه ساخته شد؛ '+fa(fail)+' عکس دانلود نشد':'ارائه ساخته شد؛ برای برگشت به قبلی: 🧰 ← ↩')}}
 var DBAK=null;
 function undoWiz(){if(!DBAK){toast('چیزی برای برگشت نیست');return}D=DBAK.D;i=DBAK.i;DBAK=null;ui();toast('به ارائه‌ی قبلی برگشتی')}
 
