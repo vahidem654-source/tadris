@@ -40,7 +40,7 @@ body.nosd #sd{display:none}body.nosd main{margin-left:0}#sdo{display:none;positi
 <b>🧑‍🏫 تخته تدریس</b>
 <a class="btn" href="index.html">← اسلاید</a>
 <button id="ins">⬇ نصب</button>
-<button id="tg">🌓</button>
+<select id="pal" title="رنگ‌بندی برنامه"></select><button id="tg">🌓</button>
 </header>
 <aside id="sd">
 <button id="rec" class="p">● ضبط</button><span id="tm" style="text-align:center;font-size:12px"></span>
@@ -269,6 +269,19 @@ $('rec').onclick=rec;$('rec2').onclick=rec;setInterval(()=>{$('rec2').textConten
 $('sdx').onclick=()=>document.body.classList.add('nosd');$('sdm').onclick=()=>document.body.classList.remove('nosd');
 $('tcl').value=TSB.c;$('tsz').value=TSB.z;const svT=()=>{try{localStorage.bd_ts=JSON.stringify(TSB)}catch(e){}};$('tcl').oninput=e=>{TSB.c=e.target.value;svT();dirty=1};$('tsz').oninput=e=>{TSB.z=+e.target.value;svT();dirty=1};
 
+const PAL=[['پیش‌فرض',null],
+['اقیانوس',{bg:'#e3f0f7',card:'#f6fbff',ink:'#12384d',acc:'#1b7fa8',line:'#b9d6e5'}],
+['جنگل',{bg:'#e6f0e4',card:'#f6fbf3',ink:'#23382a',acc:'#3f8a4f',line:'#bfd6bd'}],
+['بنفشه',{bg:'#efe8f7',card:'#fbf8ff',ink:'#35224d',acc:'#7b4fb8',line:'#d3c4e8'}],
+['گل‌سرخ',{bg:'#fbe8ee',card:'#fff7fa',ink:'#4d2233',acc:'#c23b6d',line:'#efc3d2'}],
+['غروب',{bg:'#fdeadb',card:'#fff8f1',ink:'#4a2a14',acc:'#e0642a',line:'#f0cdb3'}],
+['شب آبی',{bg:'#0e1320',card:'#171e30',ink:'#e8ecf6',acc:'#35e0c2',line:'#2a3350',d:1}],
+['زغال',{bg:'#1b1b1d',card:'#26262a',ink:'#ececec',acc:'#f5b942',line:'#3a3a40',d:1}],
+['شب بنفش',{bg:'#1a1326',card:'#251b36',ink:'#efe6fb',acc:'#b58cff',line:'#3d2e57',d:1}]];
+function applyPal(n){const r=document.documentElement,t=PAL[n]&&PAL[n][1];['--bg','--card','--ink','--acc','--line'].forEach(v=>r.style.removeProperty(v));r.style.removeProperty('color-scheme');
+ if(t){r.style.setProperty('--bg',t.bg);r.style.setProperty('--card',t.card);r.style.setProperty('--ink',t.ink);r.style.setProperty('--acc',t.acc);r.style.setProperty('--line',t.line);r.style.setProperty('color-scheme',t.d?'dark':'light')}
+ try{const m=document.querySelector('meta[name=theme-color]');if(m)m.content=t?t.bg:'#8b5a2b'}catch(e){}}
+(function(){let n=0;try{n=+localStorage.getItem('ss_pal')||0}catch(e){}if(n>=PAL.length)n=0;applyPal(n);const sel=document.getElementById('pal');if(sel){PAL.forEach((p,j)=>{const o=document.createElement('option');o.value=j;o.textContent='🎨 '+p[0];sel.append(o)});sel.value=n;sel.onchange=()=>{n=+sel.value;applyPal(n);try{localStorage.setItem('ss_pal',n)}catch(e){}}}})();
 $('tg').onclick=()=>{th=th=='dark'?'light':'dark';document.documentElement.dataset.th=th;try{localStorage.setItem('th',th)}catch(e){}dirty=1};
 let dp;addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e});
 $('ins').onclick=()=>{if(dp)dp.prompt();else alert('Chrome/Edge: منو ← Install app\nآیفون (Safari): Share ← Add to Home Screen')};
