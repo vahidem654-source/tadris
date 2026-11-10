@@ -20,6 +20,8 @@ header b{font-size:18px;color:var(--acc);margin-inline-end:auto}
 button,.btn,select,input[type=text]{user-select:none;-webkit-user-select:none;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 10px;cursor:pointer;text-decoration:none;display:inline-block}
 button.on,button.p,.btn.p{background:var(--acc);color:var(--bg);border-color:var(--acc)}
 button.r{background:#a63c2a;color:#fff;border-color:#a63c2a}
+#vb button{min-height:42px}#vp.pl{background:#2e9e5b;color:#fff;border-color:#2e9e5b;box-shadow:0 0 0 3px #2e9e5b55}#vr.rc{background:#c0392b;color:#fff;border-color:#c0392b;animation:vpu 1s infinite}@keyframes vpu{50%{box-shadow:0 0 0 6px #c0392b55}}
+body.gs main{touch-action:none}
 main{max-width:1300px;margin:auto;padding:10px}
 .tb{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0}
 .tb label{display:flex;gap:4px;align-items:center;font-size:14px}
@@ -37,7 +39,7 @@ body.nosd #sd{display:none}body.nosd main{margin-left:0}#sdo{display:none;positi
 </head>
 <body>
 <header>
-<b>🧑‍🏫 تخته تدریس</b>
+<b>🧑‍🏫 تخته تدریس <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۱۰</small></b>
 <a class="btn" href="index.html">← اسلاید</a>
 <button id="ins">⬇ نصب</button>
 <select id="pal" title="رنگ‌بندی برنامه"></select><button id="tg">🌓</button>
@@ -54,12 +56,21 @@ body.nosd #sd{display:none}body.nosd main{margin-left:0}#sdo{display:none;positi
 <div class="sr"><b>👆 لمس</b><input type="color" id="tcl" value="#ffffff" title="رنگ نشانگر لمس"></div>
 <label>اندازه <input type="range" id="tsz" min="10" max="90" value="30"></label>
 <hr>
+<label style="flex-direction:row;font-size:12px"><input type="checkbox" id="gs"> اسکرول از هرجای صفحه</label>
 <div class="sr"><button id="pv" style="width:30%">▲</button><b id="pn" style="font-size:12px"></b><button id="nx" style="width:30%">▼</button></div>
 <button id="sdx">⇤ پنهان</button>
 </aside>
 <div id="sdo"><button id="sdm" title="نوار ابزار">☰</button><button id="rec2" title="ضبط">●</button></div>
 <main>
 <canvas id="cv" width="1280" height="720"></canvas>
+<div class="tb" id="vb" style="display:none;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px">
+<b>🎬 فیلم:</b><button id="vp">▶ شروع فیلم</button><button id="vr" class="p">● ضبط + شروع همزمان</button>
+<label><input type="checkbox" id="vauto" checked> با دکمه‌ی ● ضبط، فیلم هم خودکار شروع شود</label>
+<label><input type="checkbox" id="vstop" checked> با تمام‌شدن فیلم، ضبط هم تمام شود</label>
+<label><input type="checkbox" id="va" checked> صدای فیلم در خروجی</label>
+<div style="flex:1 1 100%;display:flex;gap:8px;align-items:center"><input type="range" id="vs" min="0" max="1000" value="0" style="flex:1"><span id="vt"></span></div>
+</div>
+
 <div class="tb">
 <button id="ap" class="p">+ صفحه</button><button id="dp">🗑 حذف صفحه</button><button id="cp">مسح صفحه</button>
 <label><input type="checkbox" id="sm"> حالت اسکرول</label>
@@ -73,10 +84,7 @@ body.nosd #sd{display:none}body.nosd main{margin-left:0}#sdo{display:none;positi
 <button id="cm">📷 چهرهٔ معلم</button>
 <label>اندازه <input type="range" id="fs" min="50" max="220" value="100"></label>
 </div>
-<div class="tb" id="vb" style="display:none">
-<button id="vp">▶/⏸ فیلم</button><input type="range" id="vs" min="0" max="1000" value="0" style="flex:1">
-<label><input type="checkbox" id="va" checked> صدای فیلم در خروجی</label>
-</div>
+
 <div class="tb">
 <select id="q"><option value="l">کم‌حجم (480p)</option><option value="m" selected>متوسط (720p)</option><option value="h">بالا (1080p)</option></select>
 <button id="rec" class="p">● شروع ضبط</button><span id="tm"></span>
@@ -207,15 +215,31 @@ cv.addEventListener('wheel',e=>{e.preventDefault();
  scrollBy(e.deltaY*(H/cv.getBoundingClientRect().height)/zm);
  if(cur&&lp){const p=pt({clientX:lp[0],clientY:lp[1]});ext(p[0],p[1])}dirty=1},{passive:false});
 
+
+/* اسکرول تخته از هرجای صفحه */
+let GS=true;try{GS=localStorage.getItem('bd_gs')!=='0'}catch(e){}
+document.body.classList.toggle('gs',GS);
+{const sc=$('gs');if(sc){sc.checked=GS;sc.onchange=()=>{GS=sc.checked;document.body.classList.toggle('gs',GS);try{localStorage.setItem('bd_gs',GS?'1':'0')}catch(e){}toast2(GS?'اسکرول از هرجای صفحه روشن شد':'اسکرول فقط روی تخته')}}}
+const NOGS='#sd,#sdo,header,input,select,textarea,button,label,video,canvas,a,.ov';
+const ksc=()=>H/cv.getBoundingClientRect().height/zm;let gd=null;
+document.addEventListener('wheel',e=>{if(!GS||e.target.closest&&e.target.closest('#sd,textarea,select,.ov,canvas'))return;e.preventDefault();scrollBy(e.deltaY*ksc())},{passive:false});
+document.addEventListener('pointerdown',e=>{if(!GS||e.target.closest(NOGS))return;gd={id:e.pointerId,y:e.clientY}});
+document.addEventListener('pointermove',e=>{if(!gd||gd.id!=e.pointerId)return;scrollBy(-(e.clientY-gd.y)*ksc());gd.y=e.clientY});
+const gu=e=>{if(gd&&gd.id==e.pointerId)gd=null};document.addEventListener('pointerup',gu);document.addEventListener('pointercancel',gu);
+
 function getAC(){if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)();RD=AC.createMediaStreamDestination();vg=AC.createGain();vg.connect(RD)}if(AC.state=='suspended')AC.resume();return AC}
 const av=()=>pg[curPg()].v;
 $('vi').onchange=e=>{const f=e.target.files[0];if(!f)return;
  const v=document.createElement('video');v.src=URL.createObjectURL(f);v.playsInline=true;v.preload='auto';
  const a=getAC(),s=a.createMediaElementSource(v);s.connect(a.destination);s.connect(vg);
- v.onplay=()=>{playing.add(v);dirty=1};v.onpause=v.onended=()=>playing.delete(v);
- v.ontimeupdate=()=>{if(v==av()&&v.duration)$('vs').value=v.currentTime/v.duration*1000};
+ v.onplay=()=>{playing.add(v);dirty=1;vst()};v.onpause=()=>{playing.delete(v);vst()};v.onended=()=>{playing.delete(v);vst();if(Rc&&$('vstop').checked)setTimeout(()=>Rc&&Rc.stop(),500)};
+ v.ontimeupdate=()=>{if(v==av()&&v.duration){$('vs').value=v.currentTime/v.duration*1000;$('vt').textContent=mm(v.currentTime)+' / '+mm(v.duration)}};
  v.onloadeddata=()=>{dirty=1};
  pg.push({h:720,v});lay();go(pg.length-1);e.target.value=''};
+const mm=t=>{t=Math.floor(t||0);return String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0')};
+function vst(){const v=av(),pl=!!(v&&!v.paused&&!v.ended);$('vp').textContent=pl?'⏸ در حال پخش — توقف':'▶ شروع فیلم';$('vp').classList.toggle('pl',pl);$('vr').textContent=Rc?'■ توقف ضبط':'● ضبط + شروع همزمان';$('vr').classList.toggle('rc',!!Rc)}
+let VA=0;
+$('vr').onclick=()=>{if(Rc){rec();return}const v=av();if(v){v.currentTime=0;VA=1}rec()};
 $('vp').onclick=()=>{const v=av();if(v)v.paused?v.play():v.pause()};
 $('vs').oninput=()=>{const v=av();if(v&&v.duration)v.currentTime=v.duration*$('vs').value/1000};
 $('va').onchange=()=>{if(vg)vg.gain.value=$('va').checked?1:0};
@@ -261,11 +285,11 @@ async function rec(){
     if(d){await d.save({filename:'lesson.'+ext,data:bl})}
     else{const a=document.createElement('a');a.href=u;a.download='lesson.'+ext;document.body.append(a);a.click();a.remove()}}
    catch(err){if(!err||err.code!='declined')alert('ذخیره ممکن نشد. ویدیو را در پخش‌کننده نگه دار و ذخیره کن.')}};
-  $('rec').textContent='● ضبط';$('rec').className='p';$('tm').textContent=''};
- Rc.start(1000);const t0=Date.now();
+  $('rec').textContent='● ضبط';$('rec').className='p';$('tm').textContent='';vst()};
+ Rc.start(1000);{const v=av();if(v&&(VA||$('vauto').checked)){v.play().catch(()=>{})}VA=0}vst();const t0=Date.now();
  tmr=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);$('tm').textContent='🔴 '+String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},500);
  $('rec').textContent='■ توقف';$('rec').className='r'}
-$('rec').onclick=rec;$('rec2').onclick=rec;setInterval(()=>{$('rec2').textContent=Rc?'■':'●'},300);
+$('rec').onclick=rec;$('rec2').onclick=rec;setInterval(()=>{$('rec2').textContent=Rc?'■':'●';vst()},300);
 $('sdx').onclick=()=>document.body.classList.add('nosd');$('sdm').onclick=()=>document.body.classList.remove('nosd');
 $('tcl').value=TSB.c;$('tsz').value=TSB.z;const svT=()=>{try{localStorage.bd_ts=JSON.stringify(TSB)}catch(e){}};$('tcl').oninput=e=>{TSB.c=e.target.value;svT();dirty=1};$('tsz').oninput=e=>{TSB.z=+e.target.value;svT();dirty=1};
 
