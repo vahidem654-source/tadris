@@ -21,7 +21,6 @@ button,.btn,select,input[type=text]{user-select:none;-webkit-user-select:none;fo
 button.on,button.p,.btn.p{background:var(--acc);color:var(--bg);border-color:var(--acc)}
 button.r{background:#a63c2a;color:#fff;border-color:#a63c2a}
 #vb button{min-height:42px}#vp.pl{background:#2e9e5b;color:#fff;border-color:#2e9e5b;box-shadow:0 0 0 3px #2e9e5b55}#vr.rc{background:#c0392b;color:#fff;border-color:#c0392b;animation:vpu 1s infinite}@keyframes vpu{50%{box-shadow:0 0 0 6px #c0392b55}}
-body.gs main{touch-action:none}
 main{max-width:1300px;margin:auto;padding:10px}
 .tb{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0}
 .tb label{display:flex;gap:4px;align-items:center;font-size:14px}
@@ -39,7 +38,7 @@ body.nosd #sd{display:none}body.nosd main{margin-left:0}#sdo{display:none;positi
 </head>
 <body>
 <header>
-<b>🧑‍🏫 تخته تدریس <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۱۰</small></b>
+<b>🧑‍🏫 تخته تدریس <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۱۱</small></b>
 <a class="btn" href="index.html">← اسلاید</a>
 <button id="ins">⬇ نصب</button>
 <select id="pal" title="رنگ‌بندی برنامه"></select><button id="tg">🌓</button>
@@ -56,7 +55,6 @@ body.nosd #sd{display:none}body.nosd main{margin-left:0}#sdo{display:none;positi
 <div class="sr"><b>👆 لمس</b><input type="color" id="tcl" value="#ffffff" title="رنگ نشانگر لمس"></div>
 <label>اندازه <input type="range" id="tsz" min="10" max="90" value="30"></label>
 <hr>
-<label style="flex-direction:row;font-size:12px"><input type="checkbox" id="gs"> اسکرول از هرجای صفحه</label>
 <div class="sr"><button id="pv" style="width:30%">▲</button><b id="pn" style="font-size:12px"></b><button id="nx" style="width:30%">▼</button></div>
 <button id="sdx">⇤ پنهان</button>
 </aside>
@@ -178,9 +176,9 @@ $('zm').oninput=()=>{zm=+$('zm').value;clampS();dirty=1};
 $('ft').onclick=()=>{const i=curPg();zm=Math.min(1,H/pg[i].h);sy=pg[i].y;$('zm').value=zm;clampS();dirty=1};
 $('sc').oninput=()=>{sy=$('sc').value/1000*maxS();dirty=1};
 
-[['pen','✏️ قلم'],['eraser','🧽 پاک‌کن'],['line','╱ خط'],['rect','▭ مستطیل'],['ell','◯ دایره'],['tri','△ مثلث'],['pan','✋ اسکرول'],['touch','👆 نمایش لمس']].forEach(([t,l])=>{
+[['pen','✏️ قلم'],['eraser','🧽 پاک‌کن'],['line','╱ خط'],['rect','▭ مستطیل'],['ell','◯ دایره'],['tri','△ مثلث'],['pan','✋ اسکرول'],['touch','👆 نمایش لمس'],['page','📜 اسکرول صفحه']].forEach(([t,l])=>{
  const b=document.createElement('button');b.textContent=l;b.dataset.t=t;if(t=='pen')b.className='on';
- b.onclick=()=>{tool=t;cv.style.cursor=t=='pan'?'grab':t=='touch'?'pointer':'crosshair';document.querySelectorAll('#tools button').forEach(x=>x.className=x.dataset.t==t?'on':'');};$('tools').append(b)});
+ b.onclick=()=>{tool=t;cv.style.cursor=t=='pan'?'grab':t=='touch'?'pointer':t=='page'?'default':'crosshair';cv.style.touchAction=t=='page'?'pan-y':'none';if(t=='page')toast2('حالت اسکرول صفحه: با انگشت یا چرخ ماوس روی تخته، کل صفحه را بالا و پایین ببر');document.querySelectorAll('#tools button').forEach(x=>x.className=x.dataset.t==t?'on':'');};$('tools').append(b)});
 ['#1a1a1a','#8b5a2b','#c0392b','#2e7d32','#1565c0','#f9a825','#ffffff'].forEach(c=>{const b=document.createElement('button');b.className='sw';b.style.background=c;b.onclick=()=>$('col').value=c;$('sws').append(b)});
 $('wd').oninput=()=>$('wv').textContent=$('wd').value;
 $('fs').oninput=()=>{fb.r=+$('fs').value;dirty=1};
@@ -190,6 +188,7 @@ function ext(dx,dy){if(!cur)return;
  else{cur.a[2]=dx;cur.a[3]=dy}dirty=1}
 cv.onpointerdown=e=>{
  if(e.pointerType=='mouse'&&e.button>0)return;
+ if(tool=='page')return;
  cv.setPointerCapture(e.pointerId);
  if(tool=='touch'){const q=pt(e),n=performance.now();tpm.set(e.pointerId,{x:q[2],y:q[3],tr:[{x:q[2],y:q[3],t:n}]});taps.push({x:q[2],y:q[3],t:n});dirty=1;return}
  if(tool=='pan'){pd={id:e.pointerId,y:e.clientY};return}
@@ -202,6 +201,7 @@ cv.onpointerdown=e=>{
  else cur={k:'s',t:tool,c,w,f:$('fl').checked,a:[dx,dy,dx,dy]};
  dirty=1};
 cv.onpointermove=e=>{
+ if(tool=='page')return;
  if(tool=='touch'){const o=tpm.get(e.pointerId);if(o){const q=pt(e),n=performance.now();o.x=q[2];o.y=q[3];o.tr.push({x:q[2],y:q[3],t:n});while(o.tr.length&&n-o.tr[0].t>450)o.tr.shift();dirty=1}return}
  if(pd&&pd.id==e.pointerId){scrollBy(-(e.clientY-pd.y)*(H/cv.getBoundingClientRect().height)/zm);pd.y=e.clientY;return}
  const o=ptrs.get(e.pointerId);if(!o)return;const n=[e.clientX,e.clientY];ptrs.set(e.pointerId,n);
@@ -211,21 +211,10 @@ cv.onpointermove=e=>{
  ext(dx,dy)};
 const up=e=>{if(tpm.delete(e.pointerId))dirty=1;if(pd&&pd.id==e.pointerId)pd=null;ptrs.delete(e.pointerId);if(cur){if(cur.k=='s')paint(cur);acts.push(cur);rdo=[];cur=null}drag=null;lp=null;dirty=1};
 cv.onpointerup=up;cv.onpointercancel=up;
-cv.addEventListener('wheel',e=>{e.preventDefault();
+cv.addEventListener('wheel',e=>{if(tool=='page')return;e.preventDefault();
  scrollBy(e.deltaY*(H/cv.getBoundingClientRect().height)/zm);
  if(cur&&lp){const p=pt({clientX:lp[0],clientY:lp[1]});ext(p[0],p[1])}dirty=1},{passive:false});
 
-
-/* اسکرول تخته از هرجای صفحه */
-let GS=true;try{GS=localStorage.getItem('bd_gs')!=='0'}catch(e){}
-document.body.classList.toggle('gs',GS);
-{const sc=$('gs');if(sc){sc.checked=GS;sc.onchange=()=>{GS=sc.checked;document.body.classList.toggle('gs',GS);try{localStorage.setItem('bd_gs',GS?'1':'0')}catch(e){}toast2(GS?'اسکرول از هرجای صفحه روشن شد':'اسکرول فقط روی تخته')}}}
-const NOGS='#sd,#sdo,header,input,select,textarea,button,label,video,canvas,a,.ov';
-const ksc=()=>H/cv.getBoundingClientRect().height/zm;let gd=null;
-document.addEventListener('wheel',e=>{if(!GS||e.target.closest&&e.target.closest('#sd,textarea,select,.ov,canvas'))return;e.preventDefault();scrollBy(e.deltaY*ksc())},{passive:false});
-document.addEventListener('pointerdown',e=>{if(!GS||e.target.closest(NOGS))return;gd={id:e.pointerId,y:e.clientY}});
-document.addEventListener('pointermove',e=>{if(!gd||gd.id!=e.pointerId)return;scrollBy(-(e.clientY-gd.y)*ksc());gd.y=e.clientY});
-const gu=e=>{if(gd&&gd.id==e.pointerId)gd=null};document.addEventListener('pointerup',gu);document.addEventListener('pointercancel',gu);
 
 function getAC(){if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)();RD=AC.createMediaStreamDestination();vg=AC.createGain();vg.connect(RD)}if(AC.state=='suspended')AC.resume();return AC}
 const av=()=>pg[curPg()].v;
