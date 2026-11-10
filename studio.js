@@ -244,13 +244,13 @@ async function studioRec(){
  chunks=[];var r;
  try{r=new MediaRecorder(stm,{mimeType:mt,videoBitsPerSecond:qq.b,audioBitsPerSecond:128000})}catch(e){r=new MediaRecorder(stm)}
  r.ondataavailable=function(e){if(e.data&&e.data.size)chunks.push(e.data)};
- r.onstop=function(){clearInterval(rtm);try{ms&&ms.stop()}catch(e){}mic.close();curMic=null;Rc=null;
+ r.onstop=function(){clearInterval(rtm);try{ms&&ms.stop()}catch(e){}mic.close();curMic=null;Rc=null;try{voUpdate()}catch(e){}
   if(VO){try{VO.v.pause()}catch(e){}}
   var ext=extOf(mt),bl=new Blob(chunks,{type:'video/'+ext});showOut(bl,ext);
   q$('#rec').textContent='● شروع ضبط';q$('#rec').className='p';q$('#tm').textContent='';q$('#ps2').hidden=true;
   if(VO)voUpdate();toast('ضبط تمام شد؛ ذخیره‌اش کن')};
  if(!VO){i=0;ui()}
- Rc=r;r.start(1000);recT0=Date.now();recAcc=0;
+ Rc=r;r.start(1000);recT0=Date.now();recAcc=0;try{voUpdate()}catch(e){}
  if(ms){var n=ac.currentTime,vol=AS.mv/100;mg.gain.setValueAtTime(0,n);mg.gain.linearRampToValueAtTime(vol,n+1);
   if(VO&&VO.auto&&isFinite(VO.dur)&&AS.mfade){var rem=VO.dur-VO.v.currentTime;if(rem>6){mg.gain.setValueAtTime(vol,n+rem-3);mg.gain.linearRampToValueAtTime(0,n+rem)}}
   ms.start()}
@@ -313,12 +313,20 @@ function autoClip(o){
 function voUpdate(){
  var b=q$('#vob');
  if(!VO){if(b)b.remove();return}
- if(!b){b=document.createElement('div');b.id='vob';b.className='bar';b.innerHTML='<b>🎬 کلیپ آماده:</b><button id="vp1">▶</button><input type="range" id="vs1" min="0" max="1000" value="0" style="flex:1;min-width:120px"><span id="vt1"></span><button id="vx1">✖ بستن کلیپ</button>';q$('#tl').after(b);
+ if(!b){
+  if(!q$('#vocss')){var st=document.createElement('style');st.id='vocss';st.textContent='#vob{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;margin:8px 0;gap:8px}#vob button{min-height:42px}#vp1.pl{background:#2e9e5b;color:#fff;border-color:#2e9e5b;box-shadow:0 0 0 3px #2e9e5b55}#vr1.rc{background:#c0392b;color:#fff;border-color:#c0392b;animation:vpulse 1s infinite}@keyframes vpulse{50%{box-shadow:0 0 0 6px #c0392b55}}#vob .vs{flex:1 1 100%;display:flex;gap:8px;align-items:center}';document.head.append(st)}
+  b=document.createElement('div');b.id='vob';b.className='bar';
+  b.innerHTML='<b>🎬 کلیپ:</b><button id="vp1">▶ شروع کلیپ</button><button id="vr1" class="p">● ضبط + شروع همزمان</button><label class="k" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="va1"> کلیپ با دکمه‌ی ● بالا هم خودکار شروع شود</label><button id="vx1">✖ بستن کلیپ</button><div class="vs"><input type="range" id="vs1" min="0" max="1000" value="0" style="flex:1;min-width:120px"><span id="vt1"></span></div>';
+  cv.after(b);q$('#va1').checked=!!VO.auto;
+  q$('#va1').onchange=function(e){VO.auto=e.target.checked};
   q$('#vp1').onclick=function(){VO.v.paused?VO.v.play():VO.v.pause()};
+  q$('#vr1').onclick=function(){if(Rc){q$('#rec').click();return}VO.auto=true;q$('#va1').checked=true;try{VO.v.currentTime=0}catch(e){}q$('#rec').click()};
   q$('#vs1').oninput=function(e){VO.v.currentTime=e.target.value/1000*VO.dur;dirty=true};
   q$('#vx1').onclick=voClose;
-  VO.v.addEventListener('timeupdate',voUpdate);VO.v.addEventListener('play',voUpdate);VO.v.addEventListener('pause',voUpdate)}
- q$('#vp1').textContent=VO.v.paused?'▶':'⏸';q$('#vs1').value=VO.dur?VO.v.currentTime/VO.dur*1000:0;q$('#vt1').textContent=mmss(VO.v.currentTime)+' / '+mmss(VO.dur);dirty=true}
+  VO.v.addEventListener('timeupdate',voUpdate);VO.v.addEventListener('play',voUpdate);VO.v.addEventListener('pause',voUpdate);VO.v.addEventListener('ended',voUpdate)}
+ var pl=!VO.v.paused&&!VO.v.ended;q$('#vp1').textContent=pl?'⏸ در حال پخش — توقف':'▶ شروع کلیپ';q$('#vp1').classList.toggle('pl',pl);
+ q$('#vr1').textContent=Rc?'■ توقف ضبط':'● ضبط + شروع همزمان';q$('#vr1').classList.toggle('rc',!!Rc);
+ q$('#vs1').value=VO.dur?VO.v.currentTime/VO.dur*1000:0;q$('#vt1').textContent=mmss(VO.v.currentTime)+' / '+mmss(VO.dur);dirty=true}
 function voClose(){if(Rc){toast('اول ضبط را تمام کن');return}if(!VO)return;try{VO.v.pause()}catch(e){}URL.revokeObjectURL(VO.url);delete INK.vo;VO=null;voUpdate();dirty=true;toast('به اسلایدها برگشتی')}
 async function voOpen(clip,o){
  busy('در حال باز کردن کلیپ…');
@@ -331,7 +339,7 @@ async function voOpen(clip,o){
   VO={v:v,url:url,dur:dur,auto:o.auto,stopAuto:o.stop,keep:o.keep};
   if(o.music)AS.music=o.music;if(o.vol)AS.mv=o.vol;
   v.onended=function(){voUpdate();if(Rc&&VO&&VO.stopAuto)setTimeout(function(){Rc&&Rc.stop()},500)};
-  size();voUpdate();busy();toast('کلیپ آماده است؛ دکمه‌ی ● را بزن و صحبت کن');dirty=true;
+  size();voUpdate();busy();toast('کلیپ آماده است؛ زیر کلیپ «● ضبط + شروع همزمان» را بزن');dirty=true;
  }catch(e){busy();URL.revokeObjectURL(url);alert('این کلیپ در مرورگر باز نشد.')}}
 function voDlg(){
  if(Rc||BUSYREC){toast('اول ضبط جاری را تمام کن');return}
