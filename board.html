@@ -38,7 +38,7 @@ body.nosd #sd{display:none}body.nosd main{margin-left:0}#sdo{display:none;positi
 </head>
 <body>
 <header>
-<b>🧑‍🏫 تخته تدریس <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۱۳</small></b>
+<b>🧑‍🏫 تخته تدریس <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۱۵</small></b>
 <a class="btn" href="index.html">← اسلاید</a>
 <button id="ins">⬇ نصب</button>
 <select id="pal" title="رنگ‌بندی برنامه"></select><button id="tg">🌓</button>
@@ -253,7 +253,7 @@ $('pi').onchange=async e=>{
  try{
   $('pn').textContent='در حال بارگذاری...';
   if(!window._pj){window._pj=await import('./pdf.min.mjs');_pj.GlobalWorkerOptions.workerSrc='./pdf.worker.min.mjs'}
-  const d=await _pj.getDocument({data:await f.arrayBuffer()}).promise;
+  const d=await _pj.getDocument({data:await f.arrayBuffer(),wasmUrl:'./'}).promise;
   if(pg.length==1&&!acts.length&&!pg[0].v&&!pg[0].d)pg=[];
   const first=pg.length;
   for(let n=1;n<=Math.min(d.numPages,300);n++){const g=await d.getPage(n),v=g.getViewport({scale:1});pg.push({h:Math.round(W*v.height/v.width),d,n})}

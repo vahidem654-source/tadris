@@ -57,7 +57,7 @@ var FIN=[0xFE8F,0xFE90,0xFE95,0xFE96,0xFE99,0xFE9A,0xFE9D,0xFE9E,0xFEA1,0xFEA2,0
 var ZWRE=new RegExp('(['+FIN+'])(?=[\\u0621-\\u06FF\\uFB50-\\uFEFF])','g');
 function zw(t){return t.replace(ZWRE,'$1\u200c')}
 function pdfLines(items){
- var its=items.filter(function(t){return t.str!=null&&t.str!==''}).map(function(t){return{s:t.str,l:t.transform[4],r:t.transform[4]+Math.abs(t.width||0),y:t.transform[5],h:Math.abs(t.height||t.transform[3]||10)||10}});
+ var its=items.filter(function(t){return t.str!=null&&t.str!==''}).map(function(t){return{s:t.str.replace(/[\x00-\x08\x0b-\x1f]/g,' '),l:t.transform[4],r:t.transform[4]+Math.abs(t.width||0),y:t.transform[5],h:Math.abs(t.height||t.transform[3]||10)||10}});
  if(!its.length)return'';
  its.sort(function(a,b){return b.y-a.y});var lines=[];
  its.forEach(function(it){var L=lines[lines.length-1];if(L&&Math.abs(L.y-it.y)<Math.max(3,it.h*.45)){L.a.push(it)}else lines.push({y:it.y,a:[it],h:it.h})});
@@ -77,7 +77,7 @@ var LASTFILE=null;
 async function openSource(f){
  var name=f.name||'file',buf=await f.arrayBuffer();
  if(/\.pdf$/i.test(name)||f.type==='application/pdf'){
-  var pd=await getPdf(),doc=await pd.getDocument({data:new Uint8Array(buf)}).promise;
+  var pd=await getPdf(),doc=await pd.getDocument({data:new Uint8Array(buf),wasmUrl:'./'}).promise;
   return{kind:'pdf',doc:doc,n:doc.numPages,name:name,hidden:[],OPS:pd.OPS,
    render:async function(k,c,w){var pg=await doc.getPage(k+1),v0=pg.getViewport({scale:1}),v=pg.getViewport({scale:w/v0.width});c.width=Math.round(v.width);c.height=Math.round(v.height);var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);await pg.render({canvasContext:g,viewport:v}).promise},
    ratio:async function(){var p=await doc.getPage(1),v=p.getViewport({scale:1});return v.height/v.width},
@@ -137,6 +137,16 @@ window.drawPg=function(Z){var e=PGI.get(Z);if(!e||e.s!==Z.pg){var im=new Image()
  if(e.im.complete&&e.im.naturalWidth)X.drawImage(e.im,0,0,1280,720)};
 var TS={c:'#ffffff',z:26};try{Object.assign(TS,JSON.parse(localStorage.ss_ts||'{}'))}catch(e){}
 var rg=function(h,a){var n=parseInt(h.slice(1),16);return'rgba('+(n>>16)+','+(n>>8&255)+','+(n&255)+','+a+')'};
+var INKT={pen:1,hl:1,line:1,rect:1,circ:1,tri:1};
+function strokeDraw(s){var t=s.t||'pen',a=s.p[0],b=s.p[s.p.length-1];X.save();X.lineCap='round';X.lineJoin='round';X.strokeStyle=s.c;X.lineWidth=s.w;
+ if(t=='hl'){X.globalAlpha=.35;X.lineWidth=Math.max(s.w*3,22);X.lineCap='butt'}
+ X.beginPath();
+ if(t=='pen'||t=='hl'){s.p.forEach(function(p,j){j?X.lineTo(p[0],p[1]):X.moveTo(p[0],p[1])});if(s.p.length==1)X.lineTo(a[0]+.1,a[1])}
+ else if(t=='line'){X.moveTo(a[0],a[1]);X.lineTo(b[0],b[1])}
+ else if(t=='rect'){X.rect(Math.min(a[0],b[0]),Math.min(a[1],b[1]),Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1]))}
+ else if(t=='circ'){X.ellipse((a[0]+b[0])/2,(a[1]+b[1])/2,Math.abs(b[0]-a[0])/2+.1,Math.abs(b[1]-a[1])/2+.1,0,0,7)}
+ else if(t=='tri'){X.moveTo((a[0]+b[0])/2,a[1]);X.lineTo(b[0],b[1]);X.lineTo(a[0],b[1]);X.closePath()}
+ X.stroke();X.restore()}
 var TL={tool:'none',color:'#e0332b',w:6},INK={},ptrs=new Map(),taps=[],live=null,TR=null,BUSYREC=false;
 var VO=null;
 var inkKey=function(){return VO?'vo':i};
@@ -148,7 +158,7 @@ window.ovl=function(){
  if(!VO&&Z.cr){X.save();X.font='15px Tahoma,sans-serif';X.fillStyle='rgba(110,110,110,.95)';X.textAlign='right';X.textBaseline='bottom';X.direction='ltr';X.fillText('Image: '+Z.cr,1240,714,900);X.restore()}
  var L=INK[inkKey()]||[];
  X.save();X.lineCap='round';X.lineJoin='round';
- L.concat(live&&live.p.length?[live]:[]).forEach(function(s){X.strokeStyle=s.c;X.lineWidth=s.w;X.beginPath();s.p.forEach(function(p,j){j?X.lineTo(p[0],p[1]):X.moveTo(p[0],p[1])});if(s.p.length==1)X.lineTo(s.p[0][0]+.1,s.p[0][1]);X.stroke()});
+ L.concat(live&&live.p.length?[live]:[]).forEach(strokeDraw);
  if(TL.tool=='touch'||TL.tool=='laser'){
   taps.forEach(function(t){var a=(n-t.t)/700;if(a>=1)return;X.strokeStyle=rg(TS.c,.8*(1-a));X.lineWidth=5;X.beginPath();X.arc(t.x,t.y,TS.z-2+a*TS.z*1.5,0,7);X.stroke()});
   ptrs.forEach(function(o){
@@ -174,18 +184,18 @@ window.zoomBy=function(f){zAt(640,360,ZM.s*f)};window.zoomReset=function(){ZM.s=
 setInterval(function(){var need=!!Rc||TL.tool!='none'||ZM.s>1;cv.style.touchAction=need?'none':''},300);
 cv.addEventListener('pointerdown',function(e){if(TL.tool=='none')return;e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(x){}
  var p=cpt(e),n=performance.now();
- if(TL.tool=='pen')live={c:TL.color,w:TL.w,p:[[p.x,p.y]],id:e.pointerId};
+ if(INKT[TL.tool])live={c:TL.color,w:TL.w,t:TL.tool,p:[[p.x,p.y]],id:e.pointerId};
  else{ptrs.set(e.pointerId,{x:p.x,y:p.y,tr:[{x:p.x,y:p.y,t:n}]});if(TL.tool=='touch')taps.push({x:p.x,y:p.y,t:n})}
  dirty=true},true);
 cv.addEventListener('pointermove',function(e){if(TL.tool=='none')return;var p=cpt(e),n=performance.now();
- if(live&&live.id===e.pointerId){var ev=e.getCoalescedEvents?e.getCoalescedEvents():[e];ev.forEach(function(q){var pp=cpt(q);live.p.push([pp.x,pp.y])});dirty=true;return}
+ if(live&&live.id===e.pointerId){var ev=e.getCoalescedEvents?e.getCoalescedEvents():[e];ev.forEach(function(q){var pp=cpt(q);if(live.t=='pen'||live.t=='hl')live.p.push([pp.x,pp.y]);else live.p[1]=[pp.x,pp.y]});dirty=true;return}
  var o=ptrs.get(e.pointerId);if(!o)return;o.x=p.x;o.y=p.y;o.tr.push({x:p.x,y:p.y,t:n});while(o.tr.length&&n-o.tr[0].t>450)o.tr.shift();dirty=true},true);
-function pUp(e){if(live&&live.id===e.pointerId){var k=inkKey();(INK[k]=INK[k]||[]).push({c:live.c,w:live.w,p:live.p});live=null;dirty=true}
+function pUp(e){if(live&&live.id===e.pointerId){var k=inkKey();if((live.t=='pen'||live.t=='hl'||live.p.length>1))(INK[k]=INK[k]||[]).push({c:live.c,w:live.w,t:live.t,p:live.p});live=null;dirty=true}
  if(ptrs.delete(e.pointerId))dirty=true}
 cv.addEventListener('pointerup',pUp,true);cv.addEventListener('pointercancel',pUp,true);
 cv.addEventListener('touchmove',function(e){if(TL.tool!='none')e.preventDefault()},{passive:false});
 function buildTools(){var b=q$('#tl');b.innerHTML='<span style="font-size:13px;opacity:.8">ابزار حین ضبط:</span>'+
- [['none','🖐 بدون ابزار / اسکرول'],['pen','✎ قلم'],['touch','👆 فقط نشان‌دادن لمس'],['laser','🔴 لیزر']].map(function(a){return'<button data-t="'+a[0]+'">'+a[1]+'</button>'}).join('')+
+ [['none','🖐 بدون ابزار / اسکرول'],['pen','✎ قلم'],['hl','▮ هایلایت'],['line','╱ خط'],['rect','▭ مربع'],['circ','◯ دایره'],['tri','△ مثلث'],['touch','👆 فقط نشان‌دادن لمس'],['laser','🔴 لیزر']].map(function(a){return'<button data-t="'+a[0]+'">'+a[1]+'</button>'}).join('')+
  '<input type="color" id="tcol" value="'+TL.color+'"><select id="tw"><option value="3">نازک</option><option value="6" selected>متوسط</option><option value="12">ضخیم</option></select><span style="font-size:13px">👆 رنگ لمس</span><input type="color" id="tcl2" value="'+TS.c+'"><input type="range" id="tsz2" min="10" max="70" value="'+TS.z+'" title="اندازه‌ی نشانگر لمس" style="width:90px"><button id="tun">↶</button><button id="tcl">🧹 پاک‌کردن خط‌های این اسلاید</button><span style="font-size:13px">🔍 زوم (با دو انگشت هم می‌شود):</span><button id="zin">＋</button><button id="zou">－</button><button id="zrs">⟲ بدون زوم</button>';
  function sync(){b.querySelectorAll('[data-t]').forEach(function(x){x.classList.toggle('on',x.dataset.t==TL.tool)});cv.style.touchAction=TL.tool=='none'?'':'none';cv.style.cursor=TL.tool=='none'?'':'crosshair'}
  b.onclick=function(e){var t=e.target.closest('[data-t]');if(t){TL.tool=t.dataset.t;sync();dirty=true}};
