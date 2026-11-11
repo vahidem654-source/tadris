@@ -45,9 +45,9 @@ video{width:100%;border-radius:12px;margin-top:8px}
 </head>
 <body>
 <header>
-<b>🎞 استودیو اسلاید <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۱۲</small></b>
+<b>🎞 استودیو اسلاید <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۱۳</small></b>
 <a class="btn" href="board.html">🧑‍🏫 تخته تدریس</a>
-<label class="btn">📂 ورود PPTX / PDF<input id="imp" type="file" accept=".pptx,.ppsx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation" hidden></label><button id="hdel" title="حذف همه‌ی اسلایدها (با برگردان قابل پس‌گرفتن)">🗑 حذف ارائه</button>
+<label class="btn">📂 ورود PPTX / PDF<input id="imp" type="file" multiple accept="image/*,.pptx,.ppsx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation" hidden></label><button id="hdel" title="حذف همه‌ی اسلایدها (با برگردان قابل پس‌گرفتن)">🗑 حذف ارائه</button>
 <button id="tl_" class="p">🧰 ابزارها</button>
 <button id="ins">⬇ نصب برنامه</button>
 <select id="pal" title="رنگ‌بندی برنامه"></select><button id="tg">🌓 شب/روز</button>
@@ -304,7 +304,7 @@ window.impEdit=async f=>{
    const m=mk(ps[0],ps.slice(1).join('\n'));m.im=await slideImgs(z,k,x);out.push(m)}
   if(!out.length)throw 0;snap();D=out;i=0;ui()
  }catch(err){alert('خواندن فایل ممکن نشد. فقط فایل .pptx پشتیبانی می‌شود و فقط متن اسلایدها وارد می‌شود.')}};
-$('imp').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(window.importFile)importFile(f);else impEdit(f)};
+$('imp').onchange=e=>{const fl=[...e.target.files];e.target.value='';if(!fl.length)return;const im=fl.filter(f=>/^image\//.test(f.type)||/\.(jpe?g|png|webp|gif|bmp)$/i.test(f.name));if(im.length&&window.importPhotos){importPhotos(im);return}const f=fl[0];if(window.importFile)importFile(f);else impEdit(f)};
 
 async function rec(){
  if(Rc){Rc.stop();return}

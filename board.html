@@ -38,7 +38,7 @@ body.nosd #sd{display:none}body.nosd main{margin-left:0}#sdo{display:none;positi
 </head>
 <body>
 <header>
-<b>🧑‍🏫 تخته تدریس <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۱۲</small></b>
+<b>🧑‍🏫 تخته تدریس <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۱۳</small></b>
 <a class="btn" href="index.html">← اسلاید</a>
 <button id="ins">⬇ نصب</button>
 <select id="pal" title="رنگ‌بندی برنامه"></select><button id="tg">🌓</button>
@@ -55,7 +55,7 @@ body.nosd #sd{display:none}body.nosd main{margin-left:0}#sdo{display:none;positi
 <hr>
 <b style="font-size:12px">🔍 زوم (دو انگشت هم می‌شود)</b>
 <div class="sr"><button id="zi2" style="width:30%">＋</button><button id="zo2" style="width:30%">－</button><button id="zr2" style="width:30%">⟲</button></div>
-<button id="dp2" title="حذف صفحه‌ی فعلی">🗑 این صفحه</button><button id="dsrc">🗑 PDF / فیلم‌ها</button><button id="dall">🗑 کل تخته</button>
+<button id="dp2" title="حذف صفحه‌ی فعلی">🗑 این صفحه</button><button id="dsrc">🗑 PDF / عکس / فیلم</button><button id="dall">🗑 کل تخته</button>
 <hr>
 <div class="sr"><b>👆 لمس</b><input type="color" id="tcl" value="#ffffff" title="رنگ نشانگر لمس"></div>
 <label>اندازه <input type="range" id="tsz" min="10" max="90" value="30"></label>
@@ -83,6 +83,7 @@ body.nosd #sd{display:none}body.nosd main{margin-left:0}#sdo{display:none;positi
 <div class="tb"><label style="flex:1">پیمایش <input type="range" id="sc" min="0" max="1000" value="0" style="flex:1" disabled></label></div>
 <div class="tb">
 <label class="btn">📄 PDF کتاب<input id="pi" type="file" accept="application/pdf" hidden></label>
+<label class="btn">🖼 آپلود عکس<input id="ii" type="file" accept="image/*" multiple hidden></label>
 <label class="btn">🎬 آپلود فیلم<input id="vi" type="file" accept="video/*" hidden></label>
 <button id="cm">📷 چهرهٔ معلم</button>
 <label>اندازه <input type="range" id="fs" min="50" max="220" value="100"></label>
@@ -94,12 +95,10 @@ body.nosd #sd{display:none}body.nosd main{margin-left:0}#sdo{display:none;positi
 </div>
 <div id="out"></div>
 </main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 const $=id=>document.getElementById(id),W=1280,H=720;
 const cv=$('cv'),X=cv.getContext('2d');
 const Q={l:{w:854,h:480,b:350000,fps:12},m:{w:1280,h:720,b:900000,fps:15},h:{w:1920,h:1080,b:2500000,fps:20}};
-const PW='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 let th=(()=>{try{return localStorage.getItem('th')}catch(e){}})()||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
 document.documentElement.dataset.th=th;
 var px=0,pn=null,lastClear=null;let pg=[{h:720}],acts=[],rdo=[],tool='pen',cur=null,sy=0,zm=1,scr=false,dirty=1,DH=720,Rc=null,ch=[],tmr,AC,RD,vg,lp=null,drag=null,ms;
@@ -182,7 +181,7 @@ $('zm').oninput=()=>{if(!scr)setScr(true);zm=+$('zm').value;clampS();dirty=1};
 function bz(f,a,b){if(!scr)setScr(true);a=a==null?W/2:a;b=b==null?H/2:b;const cx=(a-ox())/zm,cy=b/zm+sy;zm=Math.min(4,Math.max(.3,zm*f));px=a-cx*zm-(W-W*zm)/2;sy=cy-b/zm;clampS();$('zm').value=zm;dirty=1}
 $('zi2').onclick=()=>bz(1.4);$('zo2').onclick=()=>bz(1/1.4);$('zr2').onclick=()=>{px=0;if(!scr)setScr(true);zm=1;$('zm').value=1;clampS();dirty=1};
 $('bro').onclick=()=>{const p=pg[curPg()];const rm=acts.filter(a=>{const m=mid(a);return m>=p.y&&m<p.y+p.h});if(!rm.length){toast2('چیزی برای پاک‌کردن نیست');return}acts=acts.filter(a=>!rm.includes(a));lastClear=rm;rdo=[];rebuild();toast2('همه‌ی نوشته‌های این صفحه پاک شد؛ با ↶ برمی‌گردد')};
-$('dsrc').onclick=()=>{const n=pg.filter(p=>p.d||p.v).length;if(!n){toast2('PDF یا فیلمی روی تخته نیست');return}if(!confirm('همه‌ی صفحه‌های PDF و فیلم ('+n+' صفحه) حذف شود؟ نوشته‌های روی آن‌ها هم پاک می‌شود.'))return;rmWhere(p=>p.d||p.v)};
+$('dsrc').onclick=()=>{const n=pg.filter(p=>p.d||p.v||p.im).length;if(!n){toast2('PDF، عکس یا فیلمی روی تخته نیست');return}if(!confirm('همه‌ی صفحه‌های PDF و فیلم ('+n+' صفحه) حذف شود؟ نوشته‌های روی آن‌ها هم پاک می‌شود.'))return;rmWhere(p=>p.d||p.v||p.im)};
 $('dall').onclick=()=>{if(!confirm('کل تخته (همه‌ی صفحه‌ها و نوشته‌ها) پاک شود؟'))return;pg.forEach(p=>{if(p.v)try{p.v.pause()}catch(e){}});playing.clear();pg=[{h:720}];acts=[];rdo=[];lastClear=null;px=0;lay();rebuild();go(0);toast2('تخته خالی شد')};
 function rmWhere(f){for(let i=pg.length-1;i>=0;i--){const p=pg[i];if(!f(p))continue;if(p.v){try{p.v.pause()}catch(e){}playing.delete(p.v)}
  const lo=p.y,hi=p.y+p.h;acts=acts.filter(a=>{const m=mid(a);return!(m>=lo&&m<hi)});acts.forEach(a=>{if(mid(a)>=hi)shift(a,-p.h)});pg.splice(i,1);lay()}
@@ -251,17 +250,22 @@ $('va').onchange=()=>{if(vg)vg.gain.value=$('va').checked?1:0};
 
 $('pi').onchange=async e=>{
  const f=e.target.files[0];if(!f)return;
- if(!window.pdfjsLib){alert('کتابخانهٔ PDF لود نشد. اینترنت لازم است.');return}
  try{
   $('pn').textContent='در حال بارگذاری...';
-  pdfjsLib.GlobalWorkerOptions.workerSrc=PW;
-  const d=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;
+  if(!window._pj){window._pj=await import('./pdf.min.mjs');_pj.GlobalWorkerOptions.workerSrc='./pdf.worker.min.mjs'}
+  const d=await _pj.getDocument({data:await f.arrayBuffer()}).promise;
   if(pg.length==1&&!acts.length&&!pg[0].v&&!pg[0].d)pg=[];
   const first=pg.length;
   for(let n=1;n<=Math.min(d.numPages,300);n++){const g=await d.getPage(n),v=g.getViewport({scale:1});pg.push({h:Math.round(W*v.height/v.width),d,n})}
   lay();go(first)
  }catch(err){alert('خواندن PDF ممکن نشد.')}
  e.target.value=''};
+$('ii').onchange=async e=>{
+ const fs=[...e.target.files].filter(f=>/^image\//.test(f.type)||/\.(jpe?g|png|webp|gif|bmp)$/i.test(f.name));e.target.value='';if(!fs.length)return;
+ $('pn').textContent='در حال بارگذاری عکس‌ها...';
+ try{if(pg.length==1&&!acts.length&&!pg[0].v&&!pg[0].d&&!pg[0].bgc)pg=[];const first=pg.length;
+  for(const f of fs){const bm=await createImageBitmap(f),k=Math.min(1,1800/bm.width),c=document.createElement('canvas');c.width=Math.round(bm.width*k);c.height=Math.round(bm.height*k);const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(bm,0,0,c.width,c.height);pg.push({h:Math.max(300,Math.round(W*c.height/c.width)),bgc:c,im:1})}
+  lay();go(first);toast2(fs.length+' عکس اضافه شد')}catch(err){alert('خواندن عکس ممکن نشد.')}};
 
 $('cm').onclick=async()=>{
  if(fb.on){fb.on=0;fb.v.srcObject.getTracks().forEach(t=>t.stop());dirty=1;return}

@@ -100,6 +100,18 @@ window.importFile=async function(f){
   q$('#m2',o).onclick=function(){o.remove();impEdit(f)};
   return}
  alert('این قالب پشتیبانی نمی‌شود. فایل را در پاورپوینت روی «ذخیره با نام ← pptx» یا PDF بگذار.')};
+window.importPhotos=async function(fl){
+ busy('در حال خواندن عکس‌ها…');
+ try{var out=[];fl.sort(function(a,b){return a.name<b.name?-1:a.name>b.name?1:0});
+  for(var k=0;k<fl.length;k++){busy('در حال خواندن عکس‌ها… '+fa(k+1)+' از '+fa(fl.length));await wait(0);
+   var bm=await createImageBitmap(fl[k]),c=document.createElement('canvas');c.width=1600;c.height=900;var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,1600,900);
+   var sc=Math.min(1600/bm.width,900/bm.height),dw=bm.width*sc,dh=bm.height*sc;g.drawImage(bm,(1600-dw)/2,(900-dh)/2,dw,dh);
+   var z=mk((fl[k].name||'').replace(/\.[^.]+$/,'').slice(0,60)||('عکس '+fa(k+1)),'');z.k='img';z.pg=c.toDataURL('image/jpeg',.88);z.txt='';out.push(z)}
+  window.snap&&snap();
+  var blank=D.length==1&&!(D[0].b||'').trim()&&D[0].k!='img'&&!(D[0].im&&D[0].im.length);
+  if(blank){D=out;i=0}else{var at=i+1;D.splice.apply(D,[at,0].concat(out));i=at}
+  ui();busy();toast(fa(out.length)+' عکس به‌عنوان اسلاید اضافه شد')
+ }catch(e){busy();alert('خواندن عکس ممکن نشد: '+(e.message||e))}};
 function pickRange(n,name){return new Promise(function(res){
  var o=modal('<b>کدام صفحه‌ها وارد شود؟</b><small>«'+esc(name)+'» '+fa(n)+' صفحه دارد. برای سرعت و حافظه، فقط همان‌هایی را که لازم داری وارد کن (شماره‌ی صفحه‌ی خود فایل).</small><div class="rw">از صفحه <input type="number" id="r1" min="1" max="'+n+'" value="1" style="width:80px"> تا <input type="number" id="r2" min="1" max="'+n+'" value="'+Math.min(n,30)+'" style="width:80px"></div><div class="rw"><button class="p" id="r3">وارد کن</button><button id="r4">انصراف</button></div>');
  q$('#r3',o).onclick=function(){var a=Math.max(1,Math.min(n,+q$('#r1',o).value||1)),b=Math.max(a,Math.min(n,+q$('#r2',o).value||n));o.remove();res([a-1,b-1])};q$('#r4',o).onclick=function(){o.remove();res(null)}})}
