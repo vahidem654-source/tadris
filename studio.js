@@ -145,7 +145,21 @@ window.ovl=function(){
    X.fillStyle=rg(TS.c,.38);X.strokeStyle=rg(TS.c,.95);X.lineWidth=4;X.beginPath();X.arc(o.x,o.y,TS.z,0,7);X.fill();X.stroke();X.strokeStyle='rgba(0,0,0,.35)';X.lineWidth=1.5;X.beginPath();X.arc(o.x,o.y,TS.z+2,0,7);X.stroke()})}
  X.restore();
  if(TR){var t=(n-TR.t0)/TR.d;if(t>=1)TR=null;else{X.save();X.setTransform(1,0,0,1,0,0);X.globalAlpha=1-t;X.drawImage(TR.img,0,0,cv.width,cv.height);X.restore()}}};
-function cpt(e){var r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*1280,y:(e.clientY-r.top)/r.height*720}}
+function cpt(e){var r=cv.getBoundingClientRect();return{x:((e.clientX-r.left)/r.width*1280-ZM.x)/ZM.s,y:((e.clientY-r.top)/r.height*720-ZM.y)/ZM.s}}
+function zraw(e){var r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*1280,y:(e.clientY-r.top)/r.height*720}}
+function zclamp(){ZM.s=Math.min(5,Math.max(1,ZM.s));ZM.x=Math.min(0,Math.max(1280*(1-ZM.s),ZM.x));ZM.y=Math.min(0,Math.max(720*(1-ZM.s),ZM.y));dirty=true}
+function zAt(px,py,ns){var cx=(px-ZM.x)/ZM.s,cy=(py-ZM.y)/ZM.s;ZM.s=ns;ZM.x=px-cx*ZM.s;ZM.y=py-cy*ZM.s;zclamp()}
+var gp=new Map(),pz=null;
+cv.addEventListener('pointerdown',function(e){if(e.pointerType=='mouse')return;gp.set(e.pointerId,zraw(e));
+ if(gp.size>=2){live=null;ptrs.clear();var a=Array.from(gp.values()),m={x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2};pz={d0:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)||1,s0:ZM.s,c:{x:(m.x-ZM.x)/ZM.s,y:(m.y-ZM.y)/ZM.s}};e.stopImmediatePropagation();e.preventDefault();dirty=true}},true);
+cv.addEventListener('pointermove',function(e){if(!gp.has(e.pointerId))return;gp.set(e.pointerId,zraw(e));
+ if(pz&&gp.size>=2){var a=Array.from(gp.values()),m={x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2},d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);
+  ZM.s=Math.min(5,Math.max(1,pz.s0*d/pz.d0));ZM.x=m.x-pz.c.x*ZM.s;ZM.y=m.y-pz.c.y*ZM.s;zclamp();e.stopImmediatePropagation();e.preventDefault()}},true);
+function zUp(e){gp.delete(e.pointerId);if(gp.size<2)pz=null}
+cv.addEventListener('pointerup',zUp,true);cv.addEventListener('pointercancel',zUp,true);
+cv.addEventListener('wheel',function(e){if(!e.ctrlKey&&!e.metaKey)return;e.preventDefault();var p=zraw(e);zAt(p.x,p.y,ZM.s*(e.deltaY<0?1.15:1/1.15))},{passive:false});
+window.zoomBy=function(f){zAt(640,360,ZM.s*f)};window.zoomReset=function(){ZM.s=1;ZM.x=ZM.y=0;dirty=true};
+setInterval(function(){var need=!!Rc||TL.tool!='none'||ZM.s>1;cv.style.touchAction=need?'none':''},300);
 cv.addEventListener('pointerdown',function(e){if(TL.tool=='none')return;e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(x){}
  var p=cpt(e),n=performance.now();
  if(TL.tool=='pen')live={c:TL.color,w:TL.w,p:[[p.x,p.y]],id:e.pointerId};
@@ -160,13 +174,14 @@ cv.addEventListener('pointerup',pUp,true);cv.addEventListener('pointercancel',pU
 cv.addEventListener('touchmove',function(e){if(TL.tool!='none')e.preventDefault()},{passive:false});
 function buildTools(){var b=q$('#tl');b.innerHTML='<span style="font-size:13px;opacity:.8">ابزار حین ضبط:</span>'+
  [['none','🖐 بدون ابزار / اسکرول'],['pen','✎ قلم'],['touch','👆 فقط نشان‌دادن لمس'],['laser','🔴 لیزر']].map(function(a){return'<button data-t="'+a[0]+'">'+a[1]+'</button>'}).join('')+
- '<input type="color" id="tcol" value="'+TL.color+'"><select id="tw"><option value="3">نازک</option><option value="6" selected>متوسط</option><option value="12">ضخیم</option></select><span style="font-size:13px">👆 رنگ لمس</span><input type="color" id="tcl2" value="'+TS.c+'"><input type="range" id="tsz2" min="10" max="70" value="'+TS.z+'" title="اندازه‌ی نشانگر لمس" style="width:90px"><button id="tun">↶</button><button id="tcl">🧹 پاک‌کردن خط‌های این اسلاید</button>';
+ '<input type="color" id="tcol" value="'+TL.color+'"><select id="tw"><option value="3">نازک</option><option value="6" selected>متوسط</option><option value="12">ضخیم</option></select><span style="font-size:13px">👆 رنگ لمس</span><input type="color" id="tcl2" value="'+TS.c+'"><input type="range" id="tsz2" min="10" max="70" value="'+TS.z+'" title="اندازه‌ی نشانگر لمس" style="width:90px"><button id="tun">↶</button><button id="tcl">🧹 پاک‌کردن خط‌های این اسلاید</button><span style="font-size:13px">🔍 زوم (با دو انگشت هم می‌شود):</span><button id="zin">＋</button><button id="zou">－</button><button id="zrs">⟲ بدون زوم</button>';
  function sync(){b.querySelectorAll('[data-t]').forEach(function(x){x.classList.toggle('on',x.dataset.t==TL.tool)});cv.style.touchAction=TL.tool=='none'?'':'none';cv.style.cursor=TL.tool=='none'?'':'crosshair'}
  b.onclick=function(e){var t=e.target.closest('[data-t]');if(t){TL.tool=t.dataset.t;sync();dirty=true}};
  q$('#tcol').oninput=function(e){TL.color=e.target.value};
  var svTS=function(){try{localStorage.ss_ts=JSON.stringify(TS)}catch(x){}};q$('#tcl2').oninput=function(e){TS.c=e.target.value;svTS();dirty=true};q$('#tsz2').oninput=function(e){TS.z=+e.target.value;svTS();dirty=true};q$('#tw').onchange=function(e){TL.w=+e.target.value};
  q$('#tun').onclick=function(){var l=INK[inkKey()];if(l&&l.length){l.pop();dirty=true}};
- q$('#tcl').onclick=function(){INK[inkKey()]=[];dirty=true};sync()}
+ q$('#tcl').onclick=function(){INK[inkKey()]=[];dirty=true};
+ q$('#zin').onclick=function(){zoomBy(1.4)};q$('#zou').onclick=function(){zoomBy(1/1.4)};q$('#zrs').onclick=zoomReset;sync()}
 buildTools();
 var _ui=window.ui;
 
@@ -316,7 +331,7 @@ function voUpdate(){
  if(!b){
   if(!q$('#vocss')){var st=document.createElement('style');st.id='vocss';st.textContent='#vob{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;margin:8px 0;gap:8px}#vob button{min-height:42px}#vp1.pl{background:#2e9e5b;color:#fff;border-color:#2e9e5b;box-shadow:0 0 0 3px #2e9e5b55}#vr1.rc{background:#c0392b;color:#fff;border-color:#c0392b;animation:vpulse 1s infinite}@keyframes vpulse{50%{box-shadow:0 0 0 6px #c0392b55}}#vob .vs{flex:1 1 100%;display:flex;gap:8px;align-items:center}';document.head.append(st)}
   b=document.createElement('div');b.id='vob';b.className='bar';
-  b.innerHTML='<b>🎬 کلیپ:</b><button id="vp1">▶ شروع کلیپ</button><button id="vr1" class="p">● ضبط + شروع همزمان</button><label class="k" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="va1"> کلیپ با دکمه‌ی ● بالا هم خودکار شروع شود</label><button id="vx1">✖ بستن کلیپ</button><div class="vs"><input type="range" id="vs1" min="0" max="1000" value="0" style="flex:1;min-width:120px"><span id="vt1"></span></div>';
+  b.innerHTML='<b>🎬 کلیپ:</b><button id="vp1">▶ شروع کلیپ</button><button id="vr1" class="p">● ضبط + شروع همزمان</button><label class="k" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="va1"> کلیپ با دکمه‌ی ● بالا هم خودکار شروع شود</label><button id="vx1">🗑 حذف کلیپ</button><div class="vs"><input type="range" id="vs1" min="0" max="1000" value="0" style="flex:1;min-width:120px"><span id="vt1"></span></div>';
   cv.after(b);q$('#va1').checked=!!VO.auto;
   q$('#va1').onchange=function(e){VO.auto=e.target.checked};
   q$('#vp1').onclick=function(){VO.v.paused?VO.v.play():VO.v.pause()};
@@ -619,12 +634,12 @@ function touchSet(){var o=modal('<b>👆 رنگ و اندازه‌ی نشانگ�
  var css=document.createElement('style');css.textContent='#fp{display:none;position:fixed;left:4px;top:50%;transform:translateY(-50%);z-index:40;flex-direction:column;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px;max-height:96vh;overflow-y:auto;opacity:.96}#fp button{width:46px;height:46px;padding:0;font-size:20px;line-height:1}#fp button.on{background:var(--acc);color:var(--bg)}#fp #ft{font-size:11px;text-align:center;direction:ltr;min-height:14px}body.big #fp{display:flex}body.big main{margin-left:62px}body.big{overflow-y:auto}body.big .bar{display:none}body.big #out .bar,body.big #vob{display:flex}';
  document.head.appendChild(css);
  var f=document.createElement('div');f.id='fp';
- f.innerHTML='<button data-f="rec" title="شروع/توقف ضبط">●</button><div id="ft"></div><button data-f="ps" title="مکث" hidden>⏸</button><button data-f="none" title="بدون ابزار / اسکرول صفحه">🖐</button><button data-f="pen" title="قلم">✎</button><button data-f="touch" title="فقط نشان‌دادن لمس">👆</button><button data-f="laser" title="لیزر">🔴</button><button data-f="un" title="برگردان آخرین خط">↶</button><button data-f="cl" title="پاک‌کردن خط‌ها">🧹</button><button data-f="pv" title="اسلاید قبلی">▲</button><button data-f="nx" title="اسلاید بعدی">▼</button><button data-f="tset" title="رنگ و اندازه‌ی نشانگر لمس">🎨</button><button data-f="tools" title="ابزارها">🧰</button><button data-f="exit" title="کوچک‌کردن">⮌</button>';
+ f.innerHTML='<button data-f="rec" title="شروع/توقف ضبط">●</button><div id="ft"></div><button data-f="ps" title="مکث" hidden>⏸</button><button data-f="zi" title="زوم بیشتر">🔍＋</button><button data-f="zo" title="زوم کمتر">🔍－</button><button data-f="zr" title="بدون زوم">⟲</button><button data-f="none" title="بدون ابزار / اسکرول صفحه">🖐</button><button data-f="pen" title="قلم">✎</button><button data-f="touch" title="فقط نشان‌دادن لمس">👆</button><button data-f="laser" title="لیزر">🔴</button><button data-f="un" title="برگردان آخرین خط">↶</button><button data-f="cl" title="پاک‌کردن خط‌ها">🧹</button><button data-f="pv" title="اسلاید قبلی">▲</button><button data-f="nx" title="اسلاید بعدی">▼</button><button data-f="tset" title="رنگ و اندازه‌ی نشانگر لمس">🎨</button><button data-f="tools" title="ابزارها">🧰</button><button data-f="exit" title="کوچک‌کردن">⮌</button>';
  document.body.appendChild(f);
  f.onclick=function(e){var b=e.target.closest('[data-f]');if(!b)return;var k=b.dataset.f;
   if(k=='rec')q$('#rec').click();else if(k=='ps')q$('#ps2').click();else if(k=='un')q$('#tun').click();else if(k=='cl')q$('#tcl').click();
   else if(k=='pv')q$('#pv')?q$('#pv').click():go(Math.max(0,i-1));else if(k=='nx')q$('#nx')?q$('#nx').click():go(Math.min(D.length-1,i+1));
-  else if(k=='tset')touchSet();else if(k=='tools')toolsMenu();else if(k=='exit')q$('#bg').click();
+  else if(k=='zi')zoomBy(1.4);else if(k=='zo')zoomBy(1/1.4);else if(k=='zr')zoomReset();else if(k=='tset')touchSet();else if(k=='tools')toolsMenu();else if(k=='exit')q$('#bg').click();
   else{var t=q$('#tl [data-t="'+k+'"]');t&&t.click()}};
  setInterval(function(){if(!document.body.classList.contains('big'))return;
   var r=!!Rc||!!BUSYREC;var rb=f.querySelector('[data-f=rec]');rb.textContent=r?'■':'●';rb.className=r?'r':'p';

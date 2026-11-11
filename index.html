@@ -45,9 +45,9 @@ video{width:100%;border-radius:12px;margin-top:8px}
 </head>
 <body>
 <header>
-<b>🎞 استودیو اسلاید <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۱۱</small></b>
+<b>🎞 استودیو اسلاید <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۱۲</small></b>
 <a class="btn" href="board.html">🧑‍🏫 تخته تدریس</a>
-<label class="btn">📂 ورود PPTX / PDF<input id="imp" type="file" accept=".pptx,.ppsx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation" hidden></label>
+<label class="btn">📂 ورود PPTX / PDF<input id="imp" type="file" accept=".pptx,.ppsx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation" hidden></label><button id="hdel" title="حذف همه‌ی اسلایدها (با برگردان قابل پس‌گرفتن)">🗑 حذف ارائه</button>
 <button id="tl_" class="p">🧰 ابزارها</button>
 <button id="ins">⬇ نصب برنامه</button>
 <select id="pal" title="رنگ‌بندی برنامه"></select><button id="tg">🌓 شب/روز</button>
@@ -214,9 +214,11 @@ function ovDraw(Z){const arr=Z.ov;if(!arr||!arr.length)return;arr.forEach(o=>{
  XL=o.x;XW=o.w||600;X.save();X.globalAlpha=0;const ye=T(full,o.y,sz,'#000',false,Z);X.restore();
  if(o.bg!==false){X.fillStyle=o.bc||'#000000b8';const pd=14;X.beginPath();(X.roundRect||X.rect).call(X,o.x-pd,o.y-pd,XW+2*pd,ye-o.y+2*pd-sz*.3,12);X.fill()}
  T(show,o.y,sz,o.c||'#ffffff',true,Z);XL=80;XW=1120;X.restore()})}
+var ZM={s:1,x:0,y:0,i:-1};
 function draw(){
  ANI.busy=0;const s=cv.width/1280,p=P[th],Z=cur();
- X.setTransform(s,0,0,s,0,0);X.fillStyle=p.bg;X.fillRect(0,0,1280,720);
+ if(ZM.i!==i){ZM.i=i;ZM.s=1;ZM.x=ZM.y=0}
+ X.setTransform(s*ZM.s,0,0,s*ZM.s,ZM.x*s,ZM.y*s);X.fillStyle=p.bg;X.fillRect(0,0,1280,720);
  if(window.VOD&&VOD()){window.ovl&&ovl();return}
  if(Z.k=='img'&&window.drawPg){const A=aniP(Z,(Z.ad||.8)*1000);if(A){X.save();aniOn(Z,A)}drawPg(Z);if(A)X.restore();ovDraw(Z);window.ovl&&ovl();return}
  X.fillStyle=p.acc;X.fillRect(0,0,1280,14);
@@ -263,6 +265,7 @@ function ui(){['t','b','k','f','s','d','c'].forEach(id=>$(id).value=cur()[id]);$
  vis();thumbs();dirty=true;save()});
 $('ai').onchange=async e=>{const Z=cur();Z.im=Z.im||[];for(const f of e.target.files){const u=await fit(f,/png/i.test(f.type));if(u)Z.im.push({u})}e.target.value='';ui()};
 $('ci').onclick=()=>{cur().im=[];ui()};
+$('hdel').onclick=()=>$('dall').click();
 const UH=[];window.snap=()=>{UH.push({D:D.slice(),i});if(UH.length>15)UH.shift()};
 $('add').onclick=()=>{snap();D.splice(i+1,0,mk('عنوان جدید',''));i++;ui()};
 $('dup').onclick=()=>{snap();D.splice(i+1,0,{...cur()});i++;ui()};

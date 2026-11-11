@@ -38,7 +38,7 @@ body.nosd #sd{display:none}body.nosd main{margin-left:0}#sdo{display:none;positi
 </head>
 <body>
 <header>
-<b>🧑‍🏫 تخته تدریس <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۱۱</small></b>
+<b>🧑‍🏫 تخته تدریس <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۱۲</small></b>
 <a class="btn" href="index.html">← اسلاید</a>
 <button id="ins">⬇ نصب</button>
 <select id="pal" title="رنگ‌بندی برنامه"></select><button id="tg">🌓</button>
@@ -50,7 +50,12 @@ body.nosd #sd{display:none}body.nosd main{margin-left:0}#sdo{display:none;positi
 <div class="sr"><input type="color" id="col" value="#8b5a2b"><span id="sws" class="sr"></span></div>
 <label>ضخامت <span id="wv">4</span><input type="range" id="wd" min="1" max="40" value="4"></label>
 <label style="flex-direction:row"><input type="checkbox" id="fl"> توپر</label>
+<button id="bro" title="پاک‌کردن همه‌ی نوشته‌های این صفحه">🧹 پاک‌کردن همه</button>
 <div class="sr"><button id="u" style="width:46%">↶</button><button id="rd" style="width:46%">↷</button></div>
+<hr>
+<b style="font-size:12px">🔍 زوم (دو انگشت هم می‌شود)</b>
+<div class="sr"><button id="zi2" style="width:30%">＋</button><button id="zo2" style="width:30%">－</button><button id="zr2" style="width:30%">⟲</button></div>
+<button id="dp2" title="حذف صفحه‌ی فعلی">🗑 این صفحه</button><button id="dsrc">🗑 PDF / فیلم‌ها</button><button id="dall">🗑 کل تخته</button>
 <hr>
 <div class="sr"><b>👆 لمس</b><input type="color" id="tcl" value="#ffffff" title="رنگ نشانگر لمس"></div>
 <label>اندازه <input type="range" id="tsz" min="10" max="90" value="30"></label>
@@ -72,7 +77,7 @@ body.nosd #sd{display:none}body.nosd main{margin-left:0}#sdo{display:none;positi
 <div class="tb">
 <button id="ap" class="p">+ صفحه</button><button id="dp">🗑 حذف صفحه</button><button id="cp">مسح صفحه</button>
 <label><input type="checkbox" id="sm"> حالت اسکرول</label>
-<label>زوم <input type="range" id="zm" min="0.3" max="1.5" step="0.05" value="1"></label>
+<label>زوم <input type="range" id="zm" min="0.3" max="4" step="0.05" value="1"></label>
 <button id="ft">جا شدن در صفحه</button>
 </div>
 <div class="tb"><label style="flex:1">پیمایش <input type="range" id="sc" min="0" max="1000" value="0" style="flex:1" disabled></label></div>
@@ -97,14 +102,14 @@ const Q={l:{w:854,h:480,b:350000,fps:12},m:{w:1280,h:720,b:900000,fps:15},h:{w:1
 const PW='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 let th=(()=>{try{return localStorage.getItem('th')}catch(e){}})()||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
 document.documentElement.dataset.th=th;
-let pg=[{h:720}],acts=[],rdo=[],tool='pen',cur=null,sy=0,zm=1,scr=false,dirty=1,DH=720,Rc=null,ch=[],tmr,AC,RD,vg,lp=null,drag=null,ms;
+var px=0,pn=null,lastClear=null;let pg=[{h:720}],acts=[],rdo=[],tool='pen',cur=null,sy=0,zm=1,scr=false,dirty=1,DH=720,Rc=null,ch=[],tmr,AC,RD,vg,lp=null,drag=null,ms;
 const tpm=new Map(),taps=[];let TSB={c:'#ffffff',z:30},pd=null,ov=0;try{Object.assign(TSB,JSON.parse(localStorage.bd_ts||'{}'))}catch(e){}
 const rgba=(h,a)=>{const n=parseInt(h.slice(1),16);return'rgba('+(n>>16)+','+(n>>8&255)+','+(n&255)+','+a+')'};
 const playing=new Set(),ptrs=new Map(),fb={on:0,x:1120,y:580,r:100,v:document.createElement('video')};
 fb.v.muted=true;fb.v.playsInline=true;
 
 const lay=()=>{let y=0;pg.forEach(p=>{p.y=y;y+=p.h});DH=y};lay();
-const ox=()=>(W-W*zm)/2,maxS=()=>Math.max(0,DH-H/zm),clampS=()=>{sy=Math.min(Math.max(sy,0),maxS())};
+const ox=()=>(W-W*zm)/2+px,maxS=()=>Math.max(0,DH-H/zm),clampS=()=>{sy=Math.min(Math.max(sy,0),maxS());const m=Math.max(0,(W*zm-W)/2);px=Math.min(m,Math.max(-m,px))};
 const curPg=()=>{const m=sy+H/zm/2,i=pg.findIndex(p=>m<p.y+p.h);return i<0?pg.length-1:i};
 const pt=e=>{const r=cv.getBoundingClientRect(),a=(e.clientX-r.left)/r.width*W,b=(e.clientY-r.top)/r.height*H;return[(a-ox())/zm,b/zm+sy,a,b]};
 
@@ -160,11 +165,12 @@ function ui(){const i=curPg();$('pn').textContent=(i+1)+' / '+pg.length;$('vb').
 function go(i){i=Math.max(0,Math.min(pg.length-1,i));if(!scr)zm=Math.min(1,H/pg[i].h);sy=pg[i].y;$('zm').value=zm;clampS();dirty=1}
 $('pv').onclick=()=>go(curPg()-1);$('nx').onclick=()=>go(curPg()+1);
 $('ap').onclick=()=>{pg.push({h:720});lay();go(pg.length-1)};
+$('dp2').onclick=()=>{if(pg.length<2){toast2('تنها صفحه را نمی‌شود حذف کرد؛ «🗑 کل تخته» را بزن');return}$('dp').click()};
 $('dp').onclick=()=>{if(pg.length<2)return;const i=curPg(),p=pg[i],a0=p.y,a1=p.y+p.h;
  acts=acts.filter(a=>{const m=mid(a);return!(m>=a0&&m<a1)});acts.forEach(a=>{if(mid(a)>=a1)shift(a,-p.h)});
  if(p.v)p.v.pause();pg.splice(i,1);lay();rdo=[];rebuild();go(Math.min(i,pg.length-1))};
 $('cp').onclick=()=>{const p=pg[curPg()];acts=acts.filter(a=>{const m=mid(a);return!(m>=p.y&&m<p.y+p.h)});rdo=[];rebuild()};
-$('u').onclick=()=>{if(acts.length){rdo.push(acts.pop());rebuild()}};
+$('u').onclick=()=>{if(lastClear){acts=acts.concat(lastClear);lastClear=null;rebuild();return}if(acts.length){rdo.push(acts.pop());rebuild()}};
 $('rd').onclick=()=>{if(rdo.length){const a=rdo.pop();acts.push(a);paint(a);dirty=1}};
 addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key=='z'){e.preventDefault();$('u').click()}});
 function setScr(v){scr=v;$('sm').checked=v;$('sc').disabled=!v;if(!v)go(curPg())}
@@ -172,7 +178,15 @@ $('sm').onchange=()=>setScr($('sm').checked);
 function scrollBy(d){if(!scr)setScr(true);const old=sy;sy+=d;
  const last=pg[pg.length-1];if(sy>maxS()&&d>0&&!last.d&&!last.v){ov+=Math.min(d,60);if(ov>260){ov=0;pg.push({h:720});lay();dirty=1;toast2('صفحه‌ی تازه اضافه شد')}}else ov=0;clampS();dirty=1}
 function toast2(t){let e=document.getElementById('ts2');if(!e){e=document.createElement('div');e.id='ts2';e.style.cssText='position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#222e;color:#fff;border-radius:12px;padding:8px 14px;z-index:99';document.body.append(e)}e.textContent=t;e.style.display='';clearTimeout(e.t);e.t=setTimeout(()=>e.style.display='none',1800)}
-$('zm').oninput=()=>{zm=+$('zm').value;clampS();dirty=1};
+$('zm').oninput=()=>{if(!scr)setScr(true);zm=+$('zm').value;clampS();dirty=1};
+function bz(f,a,b){if(!scr)setScr(true);a=a==null?W/2:a;b=b==null?H/2:b;const cx=(a-ox())/zm,cy=b/zm+sy;zm=Math.min(4,Math.max(.3,zm*f));px=a-cx*zm-(W-W*zm)/2;sy=cy-b/zm;clampS();$('zm').value=zm;dirty=1}
+$('zi2').onclick=()=>bz(1.4);$('zo2').onclick=()=>bz(1/1.4);$('zr2').onclick=()=>{px=0;if(!scr)setScr(true);zm=1;$('zm').value=1;clampS();dirty=1};
+$('bro').onclick=()=>{const p=pg[curPg()];const rm=acts.filter(a=>{const m=mid(a);return m>=p.y&&m<p.y+p.h});if(!rm.length){toast2('چیزی برای پاک‌کردن نیست');return}acts=acts.filter(a=>!rm.includes(a));lastClear=rm;rdo=[];rebuild();toast2('همه‌ی نوشته‌های این صفحه پاک شد؛ با ↶ برمی‌گردد')};
+$('dsrc').onclick=()=>{const n=pg.filter(p=>p.d||p.v).length;if(!n){toast2('PDF یا فیلمی روی تخته نیست');return}if(!confirm('همه‌ی صفحه‌های PDF و فیلم ('+n+' صفحه) حذف شود؟ نوشته‌های روی آن‌ها هم پاک می‌شود.'))return;rmWhere(p=>p.d||p.v)};
+$('dall').onclick=()=>{if(!confirm('کل تخته (همه‌ی صفحه‌ها و نوشته‌ها) پاک شود؟'))return;pg.forEach(p=>{if(p.v)try{p.v.pause()}catch(e){}});playing.clear();pg=[{h:720}];acts=[];rdo=[];lastClear=null;px=0;lay();rebuild();go(0);toast2('تخته خالی شد')};
+function rmWhere(f){for(let i=pg.length-1;i>=0;i--){const p=pg[i];if(!f(p))continue;if(p.v){try{p.v.pause()}catch(e){}playing.delete(p.v)}
+ const lo=p.y,hi=p.y+p.h;acts=acts.filter(a=>{const m=mid(a);return!(m>=lo&&m<hi)});acts.forEach(a=>{if(mid(a)>=hi)shift(a,-p.h)});pg.splice(i,1);lay()}
+ if(!pg.length){pg=[{h:720}];lay()}rdo=[];lastClear=null;rebuild();go(0)}
 $('ft').onclick=()=>{const i=curPg();zm=Math.min(1,H/pg[i].h);sy=pg[i].y;$('zm').value=zm;clampS();dirty=1};
 $('sc').oninput=()=>{sy=$('sc').value/1000*maxS();dirty=1};
 
@@ -189,7 +203,7 @@ function ext(dx,dy){if(!cur)return;
 cv.onpointerdown=e=>{
  if(e.pointerType=='mouse'&&e.button>0)return;
  if(tool=='page')return;
- cv.setPointerCapture(e.pointerId);
+ try{cv.setPointerCapture(e.pointerId)}catch(x){}
  if(tool=='touch'){const q=pt(e),n=performance.now();tpm.set(e.pointerId,{x:q[2],y:q[3],tr:[{x:q[2],y:q[3],t:n}]});taps.push({x:q[2],y:q[3],t:n});dirty=1;return}
  if(tool=='pan'){pd={id:e.pointerId,y:e.clientY};return}
  ptrs.set(e.pointerId,[e.clientX,e.clientY]);
@@ -205,13 +219,15 @@ cv.onpointermove=e=>{
  if(tool=='touch'){const o=tpm.get(e.pointerId);if(o){const q=pt(e),n=performance.now();o.x=q[2];o.y=q[3];o.tr.push({x:q[2],y:q[3],t:n});while(o.tr.length&&n-o.tr[0].t>450)o.tr.shift();dirty=1}return}
  if(pd&&pd.id==e.pointerId){scrollBy(-(e.clientY-pd.y)*(H/cv.getBoundingClientRect().height)/zm);pd.y=e.clientY;return}
  const o=ptrs.get(e.pointerId);if(!o)return;const n=[e.clientX,e.clientY];ptrs.set(e.pointerId,n);
- if(ptrs.size>=2){scrollBy(-(n[1]-o[1])/2*(H/cv.getBoundingClientRect().height)/zm);return}
+ if(ptrs.size>=2){const r=cv.getBoundingClientRect(),v=[...ptrs.values()],a=((v[0][0]+v[1][0])/2-r.left)/r.width*W,b=((v[0][1]+v[1][1])/2-r.top)/r.height*H,d=Math.hypot(v[0][0]-v[1][0],v[0][1]-v[1][1])/r.width*W||1;
+  if(!pn){if(!scr)setScr(true);pn={d0:d,z0:zm,cx:(a-ox())/zm,cy:b/zm+sy}}
+  zm=Math.min(4,Math.max(.3,pn.z0*d/pn.d0));px=a-pn.cx*zm-(W-W*zm)/2;sy=pn.cy-b/zm;clampS();$('zm').value=zm;dirty=1;return}
  const[dx,dy,a,b]=pt(e);lp=n;
  if(drag){fb.x=a-drag.x;fb.y=b-drag.y;dirty=1;return}
  ext(dx,dy)};
-const up=e=>{if(tpm.delete(e.pointerId))dirty=1;if(pd&&pd.id==e.pointerId)pd=null;ptrs.delete(e.pointerId);if(cur){if(cur.k=='s')paint(cur);acts.push(cur);rdo=[];cur=null}drag=null;lp=null;dirty=1};
+const up=e=>{if(ptrs.size<=2)pn=null;if(tpm.delete(e.pointerId))dirty=1;if(pd&&pd.id==e.pointerId)pd=null;ptrs.delete(e.pointerId);if(cur){if(cur.k=='s')paint(cur);acts.push(cur);rdo=[];cur=null}drag=null;lp=null;dirty=1};
 cv.onpointerup=up;cv.onpointercancel=up;
-cv.addEventListener('wheel',e=>{if(tool=='page')return;e.preventDefault();
+cv.addEventListener('wheel',e=>{if(tool=='page')return;e.preventDefault();if(e.ctrlKey||e.metaKey){const r=cv.getBoundingClientRect();bz(e.deltaY<0?1.15:1/1.15,(e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H);return}
  scrollBy(e.deltaY*(H/cv.getBoundingClientRect().height)/zm);
  if(cur&&lp){const p=pt({clientX:lp[0],clientY:lp[1]});ext(p[0],p[1])}dirty=1},{passive:false});
 
