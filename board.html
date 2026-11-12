@@ -38,13 +38,14 @@ body.nosd #sd{display:none}body.nosd main{margin-left:0}#sdo{display:none;positi
 </head>
 <body>
 <header>
-<b>🧑‍🏫 تخته تدریس <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۱۵</small></b>
+<b>🧑‍🏫 تخته تدریس <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۱۶</small></b>
 <a class="btn" href="index.html">← اسلاید</a>
 <button id="ins">⬇ نصب</button>
 <select id="pal" title="رنگ‌بندی برنامه"></select><button id="tg">🌓</button>
 </header>
 <aside id="sd">
 <button id="rec" class="p">● ضبط</button><span id="tm" style="text-align:center;font-size:12px"></span>
+<button id="sct" style="font-size:15px;padding:10px 4px" title="روشن: اسکرول صفحه — خاموش: قلم">✏️ قلم</button>
 <div class="tb" id="tools"></div>
 <hr>
 <div class="sr"><input type="color" id="col" value="#8b5a2b"><span id="sws" class="sr"></span></div>
@@ -63,7 +64,7 @@ body.nosd #sd{display:none}body.nosd main{margin-left:0}#sdo{display:none;positi
 <div class="sr"><button id="pv" style="width:30%">▲</button><b id="pn" style="font-size:12px"></b><button id="nx" style="width:30%">▼</button></div>
 <button id="sdx">⇤ پنهان</button>
 </aside>
-<div id="sdo"><button id="sdm" title="نوار ابزار">☰</button><button id="rec2" title="ضبط">●</button></div>
+<div id="sdo"><button id="sdm" title="نوار ابزار">☰</button><button id="rec2" title="ضبط">●</button><button id="sct2" title="اسکرول / قلم">✏️ قلم</button></div>
 <main>
 <canvas id="cv" width="1280" height="720"></canvas>
 <div class="tb" id="vb" style="display:none;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px">
@@ -189,9 +190,15 @@ function rmWhere(f){for(let i=pg.length-1;i>=0;i--){const p=pg[i];if(!f(p))conti
 $('ft').onclick=()=>{const i=curPg();zm=Math.min(1,H/pg[i].h);sy=pg[i].y;$('zm').value=zm;clampS();dirty=1};
 $('sc').oninput=()=>{sy=$('sc').value/1000*maxS();dirty=1};
 
-[['pen','✏️ قلم'],['eraser','🧽 پاک‌کن'],['line','╱ خط'],['rect','▭ مستطیل'],['ell','◯ دایره'],['tri','△ مثلث'],['pan','✋ اسکرول'],['touch','👆 نمایش لمس'],['page','📜 اسکرول صفحه']].forEach(([t,l])=>{
+[['pen','✏️ قلم'],['eraser','🧽 پاک‌کن'],['line','╱ خط'],['rect','▭ مستطیل'],['ell','◯ دایره'],['tri','△ مثلث'],['touch','👆 نمایش لمس']].forEach(([t,l])=>{
  const b=document.createElement('button');b.textContent=l;b.dataset.t=t;if(t=='pen')b.className='on';
- b.onclick=()=>{tool=t;cv.style.cursor=t=='pan'?'grab':t=='touch'?'pointer':t=='page'?'default':'crosshair';cv.style.touchAction=t=='page'?'pan-y':'none';if(t=='page')toast2('حالت اسکرول صفحه: با انگشت یا چرخ ماوس روی تخته، کل صفحه را بالا و پایین ببر');document.querySelectorAll('#tools button').forEach(x=>x.className=x.dataset.t==t?'on':'');};$('tools').append(b)});
+ b.onclick=()=>setTool(t);$('tools').append(b)});
+let prevTool='pen';
+function setTool(t){if(tool!='page'&&t=='page')prevTool=tool;tool=t;cv.style.cursor=t=='pan'?'grab':t=='touch'?'pointer':t=='page'?'default':'crosshair';cv.style.touchAction=t=='page'?'pan-y':'none';if(t=='page')toast2('حالت اسکرول: با انگشت روی تخته، صفحه را بالا و پایین ببر. برای نوشتن دوباره دکمه را بزن');
+ document.querySelectorAll('#tools button').forEach(x=>x.className=x.dataset.t==t?'on':'');
+ [$('sct'),$('sct2')].forEach(x=>{if(!x)return;const on=t=='page';x.className=on?'on':'';x.textContent=(x.id=='sct2'?'':'')+(on?'📜 اسکرول':'✏️ قلم')});}
+function togScroll(){setTool(tool=='page'?(prevTool||'pen'):'page')}
+$('sct').onclick=togScroll;$('sct2').onclick=togScroll;setTool('pen');
 ['#1a1a1a','#8b5a2b','#c0392b','#2e7d32','#1565c0','#f9a825','#ffffff'].forEach(c=>{const b=document.createElement('button');b.className='sw';b.style.background=c;b.onclick=()=>$('col').value=c;$('sws').append(b)});
 $('wd').oninput=()=>$('wv').textContent=$('wd').value;
 $('fs').oninput=()=>{fb.r=+$('fs').value;dirty=1};

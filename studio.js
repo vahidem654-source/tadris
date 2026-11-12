@@ -195,10 +195,13 @@ function pUp(e){if(live&&live.id===e.pointerId){var k=inkKey();if((live.t=='pen'
 cv.addEventListener('pointerup',pUp,true);cv.addEventListener('pointercancel',pUp,true);
 cv.addEventListener('touchmove',function(e){if(TL.tool!='none')e.preventDefault()},{passive:false});
 function buildTools(){var b=q$('#tl');b.innerHTML='<span style="font-size:13px;opacity:.8">ابزار حین ضبط:</span>'+
- [['none','🖐 بدون ابزار / اسکرول'],['pen','✎ قلم'],['hl','▮ هایلایت'],['line','╱ خط'],['rect','▭ مربع'],['circ','◯ دایره'],['tri','△ مثلث'],['touch','👆 فقط نشان‌دادن لمس'],['laser','🔴 لیزر']].map(function(a){return'<button data-t="'+a[0]+'">'+a[1]+'</button>'}).join('')+
+ [['scroll','✏️ قلم'],['hl','▮ هایلایت'],['line','╱ خط'],['rect','▭ مربع'],['circ','◯ دایره'],['tri','△ مثلث'],['touch','👆 فقط نشان‌دادن لمس'],['laser','🔴 لیزر']].map(function(a){return'<button data-t="'+a[0]+'">'+a[1]+'</button>'}).join('')+
  '<input type="color" id="tcol" value="'+TL.color+'"><select id="tw"><option value="3">نازک</option><option value="6" selected>متوسط</option><option value="12">ضخیم</option></select><span style="font-size:13px">👆 رنگ لمس</span><input type="color" id="tcl2" value="'+TS.c+'"><input type="range" id="tsz2" min="10" max="70" value="'+TS.z+'" title="اندازه‌ی نشانگر لمس" style="width:90px"><button id="tun">↶</button><button id="tcl">🧹 پاک‌کردن خط‌های این اسلاید</button><span style="font-size:13px">🔍 زوم (با دو انگشت هم می‌شود):</span><button id="zin">＋</button><button id="zou">－</button><button id="zrs">⟲ بدون زوم</button>';
- function sync(){b.querySelectorAll('[data-t]').forEach(function(x){x.classList.toggle('on',x.dataset.t==TL.tool)});cv.style.touchAction=TL.tool=='none'?'':'none';cv.style.cursor=TL.tool=='none'?'':'crosshair'}
- b.onclick=function(e){var t=e.target.closest('[data-t]');if(t){TL.tool=t.dataset.t;sync();dirty=true}};
+ function sync(){b.querySelectorAll('[data-t]').forEach(function(x){var sc=x.dataset.t=='scroll';x.classList.toggle('on',sc?TL.tool=='none':x.dataset.t==TL.tool);if(sc)x.textContent=TL.tool=='none'?'📜 اسکرول':'✏️ قلم'});cv.style.touchAction=TL.tool=='none'?'':'none';cv.style.cursor=TL.tool=='none'?'':'crosshair'}
+ b.onclick=function(e){var t=e.target.closest('[data-t]');if(!t)return;var k=t.dataset.t;
+  if(k=='scroll'){if(TL.tool=='none')TL.tool=TL.last||'pen';else{TL.last=TL.tool;TL.tool='none'}}
+  else if(TL.tool==k&&INKT[k]&&k!='pen')TL.tool='pen';else TL.tool=k;
+  sync();dirty=true};
  q$('#tcol').oninput=function(e){TL.color=e.target.value};
  var svTS=function(){try{localStorage.ss_ts=JSON.stringify(TS)}catch(x){}};q$('#tcl2').oninput=function(e){TS.c=e.target.value;svTS();dirty=true};q$('#tsz2').oninput=function(e){TS.z=+e.target.value;svTS();dirty=true};q$('#tw').onchange=function(e){TL.w=+e.target.value};
  q$('#tun').onclick=function(){var l=INK[inkKey()];if(l&&l.length){l.pop();dirty=true}};
@@ -656,7 +659,7 @@ function touchSet(){var o=modal('<b>👆 رنگ و اندازه‌ی نشانگ�
  var css=document.createElement('style');css.textContent='#fp{display:none;position:fixed;left:4px;top:50%;transform:translateY(-50%);z-index:40;flex-direction:column;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px;max-height:96vh;overflow-y:auto;opacity:.96}#fp button{width:46px;height:46px;padding:0;font-size:20px;line-height:1}#fp button.on{background:var(--acc);color:var(--bg)}#fp #ft{font-size:11px;text-align:center;direction:ltr;min-height:14px}body.big #fp{display:flex}body.big main{margin-left:62px}body.big{overflow-y:auto}body.big .bar{display:none}body.big #out .bar,body.big #vob{display:flex}';
  document.head.appendChild(css);
  var f=document.createElement('div');f.id='fp';
- f.innerHTML='<button data-f="rec" title="شروع/توقف ضبط">●</button><div id="ft"></div><button data-f="ps" title="مکث" hidden>⏸</button><button data-f="zi" title="زوم بیشتر">🔍＋</button><button data-f="zo" title="زوم کمتر">🔍－</button><button data-f="zr" title="بدون زوم">⟲</button><button data-f="none" title="بدون ابزار / اسکرول صفحه">🖐</button><button data-f="pen" title="قلم">✎</button><button data-f="touch" title="فقط نشان‌دادن لمس">👆</button><button data-f="laser" title="لیزر">🔴</button><button data-f="un" title="برگردان آخرین خط">↶</button><button data-f="cl" title="پاک‌کردن خط‌ها">🧹</button><button data-f="pv" title="اسلاید قبلی">▲</button><button data-f="nx" title="اسلاید بعدی">▼</button><button data-f="tset" title="رنگ و اندازه‌ی نشانگر لمس">🎨</button><button data-f="tools" title="ابزارها">🧰</button><button data-f="exit" title="کوچک‌کردن">⮌</button>';
+ f.innerHTML='<button data-f="rec" title="شروع/توقف ضبط">●</button><div id="ft"></div><button data-f="ps" title="مکث" hidden>⏸</button><button data-f="zi" title="زوم بیشتر">🔍＋</button><button data-f="zo" title="زوم کمتر">🔍－</button><button data-f="zr" title="بدون زوم">⟲</button><button data-f="scroll" title="روشن: اسکرول — خاموش: قلم">✏️</button><button data-f="touch" title="فقط نشان‌دادن لمس">👆</button><button data-f="laser" title="لیزر">🔴</button><button data-f="un" title="برگردان آخرین خط">↶</button><button data-f="cl" title="پاک‌کردن خط‌ها">🧹</button><button data-f="pv" title="اسلاید قبلی">▲</button><button data-f="nx" title="اسلاید بعدی">▼</button><button data-f="tset" title="رنگ و اندازه‌ی نشانگر لمس">🎨</button><button data-f="tools" title="ابزارها">🧰</button><button data-f="exit" title="کوچک‌کردن">⮌</button>';
  document.body.appendChild(f);
  f.onclick=function(e){var b=e.target.closest('[data-f]');if(!b)return;var k=b.dataset.f;
   if(k=='rec')q$('#rec').click();else if(k=='ps')q$('#ps2').click();else if(k=='un')q$('#tun').click();else if(k=='cl')q$('#tcl').click();
@@ -667,7 +670,7 @@ function touchSet(){var o=modal('<b>👆 رنگ و اندازه‌ی نشانگ�
   var r=!!Rc||!!BUSYREC;var rb=f.querySelector('[data-f=rec]');rb.textContent=r?'■':'●';rb.className=r?'r':'p';
   f.querySelector('[data-f=ps]').hidden=!Rc;f.querySelector('#ft')||0;
   var ft=q$('#ft',f);ft.textContent=r?(q$('#tm').textContent||'').replace(/[^\d:]/g,'').slice(0,5):'';
-  f.querySelectorAll('[data-f]').forEach(function(b){if(['none','pen','touch','laser'].indexOf(b.dataset.f)>=0)b.classList.toggle('on',b.dataset.f==TL.tool)})},300);
+  f.querySelectorAll('[data-f]').forEach(function(b){var k=b.dataset.f;if(k=='scroll'){b.textContent=TL.tool=='none'?'📜':'✏️';b.classList.toggle('on',TL.tool=='none')}else if(['touch','laser'].indexOf(k)>=0)b.classList.toggle('on',k==TL.tool)})},300);
 })();
 /* ============ صفحه‌ی بزرگ / تمام‌صفحه ============ */
 (function(){
