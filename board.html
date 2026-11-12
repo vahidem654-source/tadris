@@ -38,7 +38,7 @@ body.nosd #sd{display:none}body.nosd main{margin-left:0}#sdo{display:none;positi
 </head>
 <body>
 <header>
-<b>🧑‍🏫 تخته تدریس <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۱۶</small></b>
+<b>🧑‍🏫 تخته تدریس <small style="font-weight:400;opacity:.75;font-size:.7em;background:#0002;border-radius:8px;padding:1px 7px">نسخه ۱۷</small></b>
 <a class="btn" href="index.html">← اسلاید</a>
 <button id="ins">⬇ نصب</button>
 <select id="pal" title="رنگ‌بندی برنامه"></select><button id="tg">🌓</button>
@@ -159,7 +159,7 @@ function touches(){if(!tpm.size&&!taps.length)return;const n=performance.now(),r
  for(const o of tpm.values()){for(let i=1;i<o.tr.length;i++){const a=o.tr[i-1],b=o.tr[i],al=Math.max(0,1-(n-b.t)/450);X.strokeStyle=rgba(TSB.c,.45*al);X.lineWidth=r0*.9*al+1;X.lineCap='round';X.beginPath();X.moveTo(a.x,a.y);X.lineTo(b.x,b.y);X.stroke()}
   X.beginPath();X.arc(o.x,o.y,r0,0,7);X.fillStyle=rgba(TSB.c,.35);X.fill();X.lineWidth=r0*.14;X.strokeStyle=rgba(TSB.c,.95);X.stroke()}
  for(let i=taps.length-1;i>=0;i--){const a=taps[i],age=(n-a.t)/600;if(age>=1){taps.splice(i,1);continue}X.beginPath();X.arc(a.x,a.y,r0*(1+age*1.6),0,7);X.lineWidth=r0*.14;X.strokeStyle=rgba(TSB.c,.9*(1-age));X.stroke()}}
-function ui(){const i=curPg();$('pn').textContent=(i+1)+' / '+pg.length;$('vb').style.display=pg[i].v?'':'none';$('sc').value=maxS()?sy/maxS()*1000:0}
+function ui(){const i=curPg();$('pn').textContent=(i+1)+' / '+pg.length;$('vb').style.display=(pg[i]||{}).v?'':'none';$('sc').value=maxS()?sy/maxS()*1000:0}
 (function loop(){if(dirty||Rc||fb.on||playing.size||tpm.size||taps.length){draw();ui();dirty=0}requestAnimationFrame(loop)})();
 
 function go(i){i=Math.max(0,Math.min(pg.length-1,i));if(!scr)zm=Math.min(1,H/pg[i].h);sy=pg[i].y;$('zm').value=zm;clampS();dirty=1}
@@ -190,7 +190,7 @@ function rmWhere(f){for(let i=pg.length-1;i>=0;i--){const p=pg[i];if(!f(p))conti
 $('ft').onclick=()=>{const i=curPg();zm=Math.min(1,H/pg[i].h);sy=pg[i].y;$('zm').value=zm;clampS();dirty=1};
 $('sc').oninput=()=>{sy=$('sc').value/1000*maxS();dirty=1};
 
-[['pen','✏️ قلم'],['eraser','🧽 پاک‌کن'],['line','╱ خط'],['rect','▭ مستطیل'],['ell','◯ دایره'],['tri','△ مثلث'],['touch','👆 نمایش لمس']].forEach(([t,l])=>{
+[['pen','✏️ قلم'],['eraser','🧽 پاک‌کن'],['line','╱ خط'],['rect','▭ مستطیل'],['ell','◯ دایره'],['tri','△ مثلث'],['pan','✋ اسکرول با یک انگشت'],['touch','👆 نمایش لمس']].forEach(([t,l])=>{
  const b=document.createElement('button');b.textContent=l;b.dataset.t=t;if(t=='pen')b.className='on';
  b.onclick=()=>setTool(t);$('tools').append(b)});
 let prevTool='pen';
@@ -211,7 +211,7 @@ cv.onpointerdown=e=>{
  if(tool=='page')return;
  try{cv.setPointerCapture(e.pointerId)}catch(x){}
  if(tool=='touch'){const q=pt(e),n=performance.now();tpm.set(e.pointerId,{x:q[2],y:q[3],tr:[{x:q[2],y:q[3],t:n}]});taps.push({x:q[2],y:q[3],t:n});dirty=1;return}
- if(tool=='pan'){pd={id:e.pointerId,y:e.clientY};return}
+ if(tool=='pan'){if(pd)return;pd={id:e.pointerId,y:e.clientY,x:e.clientX};return}
  ptrs.set(e.pointerId,[e.clientX,e.clientY]);
  if(ptrs.size==2){if(cur){cur=null;rebuild()}drag=null;return}
  const[dx,dy,a,b]=pt(e);lp=[e.clientX,e.clientY];
@@ -223,7 +223,7 @@ cv.onpointerdown=e=>{
 cv.onpointermove=e=>{
  if(tool=='page')return;
  if(tool=='touch'){const o=tpm.get(e.pointerId);if(o){const q=pt(e),n=performance.now();o.x=q[2];o.y=q[3];o.tr.push({x:q[2],y:q[3],t:n});while(o.tr.length&&n-o.tr[0].t>450)o.tr.shift();dirty=1}return}
- if(pd&&pd.id==e.pointerId){scrollBy(-(e.clientY-pd.y)*(H/cv.getBoundingClientRect().height)/zm);pd.y=e.clientY;return}
+ if(pd&&pd.id==e.pointerId){{const rr=cv.getBoundingClientRect();scrollBy(-(e.clientY-pd.y)*(H/rr.height)/zm);if(zm>1){px+=(e.clientX-pd.x)*(W/rr.width);clampS();dirty=1}pd.y=e.clientY;pd.x=e.clientX}return}
  const o=ptrs.get(e.pointerId);if(!o)return;const n=[e.clientX,e.clientY];ptrs.set(e.pointerId,n);
  if(ptrs.size>=2){const r=cv.getBoundingClientRect(),v=[...ptrs.values()],a=((v[0][0]+v[1][0])/2-r.left)/r.width*W,b=((v[0][1]+v[1][1])/2-r.top)/r.height*H,d=Math.hypot(v[0][0]-v[1][0],v[0][1]-v[1][1])/r.width*W||1;
   if(!pn){if(!scr)setScr(true);pn={d0:d,z0:zm,cx:(a-ox())/zm,cy:b/zm+sy}}
